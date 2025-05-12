@@ -16,10 +16,13 @@ SRC_FILES += \
   $(SDK_ROOT)/components/ble/common/ble_srv_common.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/nrf_ble_gatt/nrf_ble_gatt.c \
+  $(SDK_ROOT)/components/ble/ble_services/ble_dfu/ble_dfu.c \
+  $(SDK_ROOT)/components/ble/ble_services/ble_dfu/ble_dfu_unbonded.c \
   $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c \
   $(SDK_ROOT)/components/libraries/atomic_flags/nrf_atflags.c \
   $(SDK_ROOT)/components/libraries/atomic/nrf_atomic.c \
   $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c \
+  $(SDK_ROOT)/components/libraries/bootloader/dfu/nrf_dfu_svci.c \
   $(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
   $(SDK_ROOT)/components/libraries/fds/fds.c \
   $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage.c \
@@ -82,6 +85,9 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/atomic_fifo \
   $(SDK_ROOT)/components/libraries/atomic_flags \
   $(SDK_ROOT)/components/libraries/balloc \
+  $(SDK_ROOT)/components/libraries/bootloader \
+  $(SDK_ROOT)/components/libraries/bootloader/ble_dfu \
+  $(SDK_ROOT)/components/libraries/bootloader/dfu \
   $(SDK_ROOT)/components/libraries/delay \
   $(SDK_ROOT)/components/libraries/fstorage \
   $(SDK_ROOT)/components/libraries/fds \
@@ -95,11 +101,13 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/sortlist \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(SDK_ROOT)/components/libraries/strerror \
+  $(SDK_ROOT)/components/libraries/svc \
   $(SDK_ROOT)/components/libraries/timer \
   $(SDK_ROOT)/components/libraries/util \
   $(SDK_ROOT)/components/ble/common \
   $(SDK_ROOT)/components/ble/ble_advertising \
   $(SDK_ROOT)/components/ble/nrf_ble_gatt \
+  $(SDK_ROOT)/components/ble/ble_services/ble_dfu \
   $(SDK_ROOT)/external/fprintf \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/integration/nrfx \
@@ -129,6 +137,8 @@ CFLAGS += -DDEVELOP_IN_NRF52840
 CFLAGS += -DFLOAT_ABI_SOFT
 CFLAGS += -DNRF52811_XXAA
 CFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
+CFLAGS += -DNRF_DFU_SVCI_ENABLED
+CFLAGS += -DNRF_DFU_TRANSPORT_BLE=1
 CFLAGS += -DNRF_SD_BLE_API_VERSION=7
 CFLAGS += -DS112
 CFLAGS += -DSOFTDEVICE_PRESENT
@@ -155,6 +165,8 @@ ASMFLAGS += -DDEVELOP_IN_NRF52840
 ASMFLAGS += -DFLOAT_ABI_SOFT
 ASMFLAGS += -DNRF52811_XXAA
 ASMFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
+ASMFLAGS += -DNRF_DFU_SVCI_ENABLED
+ASMFLAGS += -DNRF_DFU_TRANSPORT_BLE=1
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=7
 ASMFLAGS += -DS112
 ASMFLAGS += -DSOFTDEVICE_PRESENT

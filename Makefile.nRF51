@@ -15,7 +15,10 @@ SRC_FILES += \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
   $(SDK_ROOT)/components/ble/common/ble_srv_common.c \
+  $(SDK_ROOT)/components/ble/ble_services/ble_dfu/ble_dfu.c \
+  $(SDK_ROOT)/components/libraries/bootloader/dfu/nrf_dfu_settings.c \
   $(SDK_ROOT)/components/libraries/fds/fds.c \
+  $(SDK_ROOT)/components/libraries/crc32/crc32.c \
   $(SDK_ROOT)/components/libraries/fstorage/fstorage.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
@@ -35,6 +38,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/segger_rtt/RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
+  $(SDK_ROOT)/dfu/nrf_dfu_flash_buttonless.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/EPD/EPD_config.c \
   $(PROJ_DIR)/EPD/EPD_driver.c \
@@ -61,6 +65,8 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/drivers_nrf/spi_master \
   $(SDK_ROOT)/components/libraries/fstorage \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
+  $(SDK_ROOT)/components/libraries/bootloader/dfu \
+  $(SDK_ROOT)/components/libraries/crc32 \
   $(SDK_ROOT)/components/libraries/fds \
   $(SDK_ROOT)/components/libraries/log \
   $(SDK_ROOT)/components/libraries/log/src \
@@ -70,6 +76,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/util \
   $(SDK_ROOT)/components/ble/common \
   $(SDK_ROOT)/components/ble/ble_advertising \
+  $(SDK_ROOT)/components/ble/ble_services/ble_dfu \
   $(SDK_ROOT)/components/softdevice/common/softdevice_handler \
   $(SDK_ROOT)/components/softdevice/s130/headers \
   $(SDK_ROOT)/components/softdevice/s130/headers/nrf51 \
@@ -87,6 +94,7 @@ CFLAGS += -DNRF51
 CFLAGS += -DS130
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
 CFLAGS += -DSWI_DISABLE0
+CFLAGS += -DNRF_DFU_SETTINGS_VERSION=1
 CFLAGS += -DNRF51822
 CFLAGS += -DNRF_SD_BLE_API_VERSION=2
 CFLAGS += -mcpu=cortex-m0
@@ -107,6 +115,7 @@ ASMFLAGS += -DNRF51
 ASMFLAGS += -DS130
 ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
 ASMFLAGS += -DSWI_DISABLE0
+ASMFLAGS += -DNRF_DFU_SETTINGS_VERSION=1
 ASMFLAGS += -DNRF51822
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=2
 
@@ -118,9 +127,9 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs -lc -lnosys
 
-nrf51822_xxaa: CFLAGS += -D__HEAP_SIZE=4096
+nrf51822_xxaa: CFLAGS += -D__HEAP_SIZE=2048
 nrf51822_xxaa: CFLAGS += -D__STACK_SIZE=2048
-nrf51822_xxaa: ASMFLAGS += -D__HEAP_SIZE=4096
+nrf51822_xxaa: ASMFLAGS += -D__HEAP_SIZE=2048
 nrf51822_xxaa: ASMFLAGS += -D__STACK_SIZE=2048
 
 

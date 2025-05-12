@@ -20,11 +20,13 @@
 #include "ble_advdata.h"
 #include "ble_advertising.h"
 #include "ble_conn_params.h"
+#include "ble_dfu.h"
 #if defined(S112)
 #include "nrf_sdh.h"
 #include "nrf_sdh_soc.h"
 #include "nrf_sdh_ble.h"
 #include "nrf_ble_gatt.h"
+#include "nrf_bootloader_info.h"
 #else
 #include "fstorage.h"
 #include "softdevice_handler.h"
@@ -83,6 +85,8 @@
 #if defined(S112)
 NRF_BLE_GATT_DEF(m_gatt);                                                               /**< GATT module instance. */
 BLE_ADVERTISING_DEF(m_advertising);                                                     /**< Advertising module instance. */
+#else
+static ble_dfu_t                         m_dfus;                                        /**< Structure used to identify the DFU service. */
 #endif
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;       /**< Handle of the current connection. */
 static ble_uuid_t                        m_adv_uuids[] = {{BLE_UUID_EPD_SVC, \
@@ -107,6 +111,97 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
+
+#if defined(S112)
+static void buttonless_dfu_sdh_state_observer(nrf_sdh_state_evt_t state, void * p_context)
+{
+    if (state == NRF_SDH_EVT_STATE_DISABLED)
+    {
+        // Softdevice was disabled before going into reset. Inform bootloader to skip CRC on next boot.
+        nrf_power_gpregret2_set(BOOTLOADER_DFU_SKIP_CRC);
+
+        //Go to system off.
+        nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_GOTO_SYSOFF);
+    }
+}
+
+/* nrf_sdh state observer. */
+NRF_SDH_STATE_OBSERVER(m_buttonless_dfu_state_obs, 0) =
+{
+    .handler = buttonless_dfu_sdh_state_observer,
+};
+
+static void advertising_config_get(ble_adv_modes_config_t * p_config)
+{
+    memset(p_config, 0, sizeof(ble_adv_modes_config_t));
+
+    p_config->ble_adv_fast_enabled  = true;
+    p_config->ble_adv_fast_interval = APP_ADV_INTERVAL;
+    p_config->ble_adv_fast_timeout  = APP_ADV_TIMEOUT_IN_SECONDS * 100;
+}
+
+static void ble_dfu_evt_handler(ble_dfu_buttonless_evt_type_t event)
+{
+    switch (event)
+    {
+        case BLE_DFU_EVT_BOOTLOADER_ENTER_PREPARE:
+        {
+            NRF_LOG_INFO("Device is preparing to enter bootloader mode.");
+
+            // Prevent device from advertising on disconnect.
+            ble_adv_modes_config_t config;
+            advertising_config_get(&config);
+            config.ble_adv_on_disconnect_disabled = true;
+            ble_advertising_modes_config_set(&m_advertising, &config);
+
+            // Disconnect all other bonded devices that currently are connected.
+            // This is required to receive a service changed indication
+            // on bootup after a successful (or aborted) Device Firmware Update.
+            APP_ERROR_CHECK(sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+            break;
+        }
+
+        case BLE_DFU_EVT_BOOTLOADER_ENTER:
+            NRF_LOG_INFO("Device will enter bootloader mode.");
+            break;
+
+        case BLE_DFU_EVT_BOOTLOADER_ENTER_FAILED:
+            NRF_LOG_ERROR("Request to enter bootloader mode failed asynchroneously.");
+            APP_ERROR_CHECK(false);
+            break;
+
+        case BLE_DFU_EVT_RESPONSE_SEND_ERROR:
+            NRF_LOG_ERROR("Request to send a response to client failed.");
+            APP_ERROR_CHECK(false);
+            break;
+
+        default:
+            NRF_LOG_ERROR("Unknown event from ble_dfu_buttonless.");
+            break;
+    }
+}
+#else
+static void ble_dfu_evt_handler(ble_dfu_t * p_dfu, ble_dfu_evt_t * p_evt)
+{
+    switch (p_evt->type)
+    {
+        case BLE_DFU_EVT_INDICATION_DISABLED:
+            NRF_LOG_INFO("Indication for BLE_DFU is disabled\r\n");
+            break;
+
+        case BLE_DFU_EVT_INDICATION_ENABLED:
+            NRF_LOG_INFO("Indication for BLE_DFU is enabled\r\n");
+            break;
+
+        case BLE_DFU_EVT_ENTERING_BOOTLOADER:
+            NRF_LOG_INFO("Device is entering bootloader mode!\r\n");
+            break;
+        default:
+            NRF_LOG_INFO("Unknown event from ble_dfu\r\n");
+            break;
+    }
+}
+#endif
 
 static void clock_timer_timeout_handler(void * p_context)
 {
@@ -166,8 +261,23 @@ void sleep_mode_enter(void)
  */
 static void services_init(void)
 {
+    // Initialize EPD Service.
     memset(&m_epd, 0, sizeof(ble_epd_t));
     APP_ERROR_CHECK(ble_epd_init(&m_epd));
+
+#if defined(S112)
+    ble_dfu_buttonless_init_t dfus_init = {0};
+    dfus_init.evt_handler = ble_dfu_evt_handler;
+    APP_ERROR_CHECK(ble_dfu_buttonless_init(&dfus_init));
+#else
+    // Initialize the Device Firmware Update Service.
+    ble_dfu_init_t dfus_init;
+    memset(&dfus_init, 0, sizeof(dfus_init));
+    dfus_init.evt_handler                               = ble_dfu_evt_handler;
+    dfus_init.ctrl_point_security_req_write_perm        = SEC_SIGNED;
+    dfus_init.ctrl_point_security_req_cccd_write_perm   = SEC_SIGNED;
+    APP_ERROR_CHECK(ble_dfu_init(&m_dfus, &dfus_init));
+#endif
 }
 
 /**@brief Function for the GAP initialization.
@@ -407,6 +517,7 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
     ble_epd_on_ble_evt(&m_epd, p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
+    ble_dfu_on_ble_evt(&m_dfus, p_ble_evt);
 }
 
 
@@ -459,6 +570,7 @@ static void ble_stack_init(void)
     APP_ERROR_CHECK(softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,
                                                          PERIPHERAL_LINK_COUNT,
                                                          &ble_enable_params));
+    ble_enable_params.common_enable_params.vs_uuid_count = 2;
 
     // Check the ram settings against the used number of links
     CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT,PERIPHERAL_LINK_COUNT);
@@ -618,6 +730,7 @@ int main(void)
     gap_params_init();
 #if defined(S112)
     gatt_init();
+    ble_dfu_buttonless_async_svci_init();
 #else
     ble_options_set();
 #endif

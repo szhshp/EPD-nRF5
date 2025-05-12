@@ -55,9 +55,9 @@
 #include "nrf_bootloader_info.h"
 #include "nrf_svci_async_function.h"
 #include "nrf_pwr_mgmt.h"
-#include "peer_manager.h"
-#include "gatts_cache_manager.h"
-#include "peer_id.h"
+//#include "peer_manager.h"
+//#include "gatts_cache_manager.h"
+//#include "peer_id.h"
 
 #define MAX_CTRL_POINT_RESP_PARAM_LEN   3                           /**< Max length of the responses. */
 

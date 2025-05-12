@@ -301,8 +301,8 @@
               </OCR_RVCT8>
               <OCR_RVCT9>
                 <Type>0</Type>
-                <StartAddress>0x20001fe8</StartAddress>
-                <Size>0x2018</Size>
+                <StartAddress>0x20001ff8</StartAddress>
+                <Size>0x2008</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -338,9 +338,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--locale=english</MiscControls>
-              <Define>BLE_STACK_SUPPORT_REQD NRF51822 NRF_SD_BLE_API_VERSION=2 S130 NRF51 SOFTDEVICE_PRESENT SWI_DISABLE0 __HEAP_SIZE=4096 __STACK_SIZE=2048</Define>
+              <Define>BLE_STACK_SUPPORT_REQD NRF51822 NRF_SD_BLE_API_VERSION=2 S130 NRF51 SOFTDEVICE_PRESENT NRF_DFU_SETTINGS_VERSION=1 SWI_DISABLE0 __HEAP_SIZE=4096 __STACK_SIZE=1200</Define>
               <Undefine></Undefine>
-              <IncludePath>..\config;..\EPD;..\GUI;..\SDK\12.3.0_d7731ad;..\SDK\12.3.0_d7731ad\components\toolchain;..\SDK\12.3.0_d7731ad\components\toolchain\cmsis\include;..\SDK\12.3.0_d7731ad\components\drivers_nrf\clock;..\SDK\12.3.0_d7731ad\components\drivers_nrf\common;..\SDK\12.3.0_d7731ad\components\drivers_nrf\delay;..\SDK\12.3.0_d7731ad\components\drivers_nrf\gpiote;..\SDK\12.3.0_d7731ad\components\drivers_nrf\hal;..\SDK\12.3.0_d7731ad\components\drivers_nrf\spi_master;..\SDK\12.3.0_d7731ad\components\drivers_nrf\twi_master;..\SDK\12.3.0_d7731ad\external\segger_rtt;..\SDK\12.3.0_d7731ad\components\libraries\fds;..\SDK\12.3.0_d7731ad\components\libraries\fstorage;..\SDK\12.3.0_d7731ad\components\libraries\experimental_section_vars;..\SDK\12.3.0_d7731ad\components\libraries\log;..\SDK\12.3.0_d7731ad\components\libraries\log\src;..\SDK\12.3.0_d7731ad\components\libraries\pwr_mgmt;..\SDK\12.3.0_d7731ad\components\libraries\scheduler;..\SDK\12.3.0_d7731ad\components\libraries\trace;..\SDK\12.3.0_d7731ad\components\libraries\timer;..\SDK\12.3.0_d7731ad\components\libraries\util;..\SDK\12.3.0_d7731ad\components\ble\common;..\SDK\12.3.0_d7731ad\components\ble\ble_advertising;..\SDK\12.3.0_d7731ad\components\softdevice\common\softdevice_handler;..\SDK\12.3.0_d7731ad\components\softdevice\s130\headers;..\SDK\12.3.0_d7731ad\components\softdevice\s130\headers\nrf51</IncludePath>
+              <IncludePath>..\config;..\EPD;..\GUI;..\SDK\12.3.0_d7731ad;..\SDK\12.3.0_d7731ad\components\toolchain;..\SDK\12.3.0_d7731ad\components\toolchain\cmsis\include;..\SDK\12.3.0_d7731ad\components\drivers_nrf\clock;..\SDK\12.3.0_d7731ad\components\drivers_nrf\common;..\SDK\12.3.0_d7731ad\components\drivers_nrf\delay;..\SDK\12.3.0_d7731ad\components\drivers_nrf\gpiote;..\SDK\12.3.0_d7731ad\components\drivers_nrf\hal;..\SDK\12.3.0_d7731ad\components\drivers_nrf\spi_master;..\SDK\12.3.0_d7731ad\components\drivers_nrf\twi_master;..\SDK\12.3.0_d7731ad\external\segger_rtt;..\SDK\12.3.0_d7731ad\components\libraries\bootloader\dfu;..\SDK\12.3.0_d7731ad\components\libraries\crc32;..\SDK\12.3.0_d7731ad\components\libraries\fds;..\SDK\12.3.0_d7731ad\components\libraries\fstorage;..\SDK\12.3.0_d7731ad\components\libraries\experimental_section_vars;..\SDK\12.3.0_d7731ad\components\libraries\log;..\SDK\12.3.0_d7731ad\components\libraries\log\src;..\SDK\12.3.0_d7731ad\components\libraries\pwr_mgmt;..\SDK\12.3.0_d7731ad\components\libraries\scheduler;..\SDK\12.3.0_d7731ad\components\libraries\trace;..\SDK\12.3.0_d7731ad\components\libraries\timer;..\SDK\12.3.0_d7731ad\components\libraries\util;..\SDK\12.3.0_d7731ad\components\ble\common;..\SDK\12.3.0_d7731ad\components\ble\ble_advertising;..\SDK\12.3.0_d7731ad\components\ble\ble_services\ble_dfu;..\SDK\12.3.0_d7731ad\components\softdevice\common\softdevice_handler;..\SDK\12.3.0_d7731ad\components\softdevice\s130\headers;..\SDK\12.3.0_d7731ad\components\softdevice\s130\headers\nrf51</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -356,7 +356,7 @@
             <ClangAsOpt>1</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>BLE_STACK_SUPPORT_REQD NRF51822 NRF_SD_BLE_API_VERSION=2 S130 NRF51 SOFTDEVICE_PRESENT SWI_DISABLE0 __HEAP_SIZE=4096 __STACK_SIZE=2048</Define>
+              <Define>BLE_STACK_SUPPORT_REQD NRF51822 NRF_SD_BLE_API_VERSION=2 S130 NRF51 SOFTDEVICE_PRESENT NRF_DFU_SETTINGS_VERSION=1 SWI_DISABLE0 __HEAP_SIZE=4096 __STACK_SIZE=1200</Define>
               <Undefine></Undefine>
               <IncludePath>..\config;..\EPD;..\GUI;..\SDK\12.3.0_d7731ad;..\SDK\12.3.0_d7731ad\components\toolchain;..\SDK\12.3.0_d7731ad\components\toolchain\cmsis\include;..\SDK\12.3.0_d7731ad\components\drivers_nrf\clock;..\SDK\12.3.0_d7731ad\components\drivers_nrf\common;..\SDK\12.3.0_d7731ad\components\drivers_nrf\delay;..\SDK\12.3.0_d7731ad\components\drivers_nrf\gpiote;..\SDK\12.3.0_d7731ad\components\drivers_nrf\hal;..\SDK\12.3.0_d7731ad\components\drivers_nrf\spi_master;..\SDK\12.3.0_d7731ad\components\drivers_nrf\twi_master;..\SDK\12.3.0_d7731ad\external\segger_rtt;..\SDK\12.3.0_d7731ad\components\libraries\fds;..\SDK\12.3.0_d7731ad\components\libraries\fstorage;..\SDK\12.3.0_d7731ad\components\libraries\experimental_section_vars;..\SDK\12.3.0_d7731ad\components\libraries\log;..\SDK\12.3.0_d7731ad\components\libraries\log\src;..\SDK\12.3.0_d7731ad\components\libraries\pwr_mgmt;..\SDK\12.3.0_d7731ad\components\libraries\scheduler;..\SDK\12.3.0_d7731ad\components\libraries\trace;..\SDK\12.3.0_d7731ad\components\libraries\timer;..\SDK\12.3.0_d7731ad\components\libraries\util;..\SDK\12.3.0_d7731ad\components\ble\common;..\SDK\12.3.0_d7731ad\components\ble\ble_advertising;..\SDK\12.3.0_d7731ad\components\softdevice\common\softdevice_handler;..\SDK\12.3.0_d7731ad\components\softdevice\s130\headers;..\SDK\12.3.0_d7731ad\components\softdevice\s130\headers\nrf51</IncludePath>
             </VariousControls>
@@ -479,6 +479,26 @@
               <FileType>1</FileType>
               <FilePath>..\SDK\12.3.0_d7731ad\components\ble\common\ble_srv_common.c</FilePath>
             </File>
+            <File>
+              <FileName>ble_dfu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\components\ble\ble_services\ble_dfu\ble_dfu.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>nRF_Bootloader</GroupName>
+          <Files>
+            <File>
+              <FileName>nrf_dfu_settings.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\components\libraries\bootloader\dfu\nrf_dfu_settings.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_dfu_flash_buttonless.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\dfu\nrf_dfu_flash_buttonless.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -533,6 +553,11 @@
               <FileName>app_util_platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SDK\12.3.0_d7731ad\components\libraries\util\app_util_platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\components\libraries\crc32\crc32.c</FilePath>
             </File>
             <File>
               <FileName>fstorage.c</FileName>
@@ -1086,6 +1111,26 @@
               <FileType>1</FileType>
               <FilePath>..\SDK\12.3.0_d7731ad\components\ble\common\ble_srv_common.c</FilePath>
             </File>
+            <File>
+              <FileName>ble_dfu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\components\ble\ble_services\ble_dfu\ble_dfu.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>nRF_Bootloader</GroupName>
+          <Files>
+            <File>
+              <FileName>nrf_dfu_settings.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\components\libraries\bootloader\dfu\nrf_dfu_settings.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_dfu_flash_buttonless.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\dfu\nrf_dfu_flash_buttonless.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1140,6 +1185,11 @@
               <FileName>app_util_platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SDK\12.3.0_d7731ad\components\libraries\util\app_util_platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\12.3.0_d7731ad\components\libraries\crc32\crc32.c</FilePath>
             </File>
             <File>
               <FileName>fstorage.c</FileName>
