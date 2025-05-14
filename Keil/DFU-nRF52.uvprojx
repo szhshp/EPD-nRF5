@@ -48,14 +48,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\_build\</OutputDirectory>
-          <OutputName>nrf52811_xxaa_s112</OutputName>
+          <OutputDirectory>.\_build_DFU52\</OutputDirectory>
+          <OutputName>bl_nrf52811_xxaa_s112</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath>.\_build\</ListingPath>
+          <ListingPath>.\_build_DFU52\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>

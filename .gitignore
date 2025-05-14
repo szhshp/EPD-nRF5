@@ -45,6 +45,8 @@
 # Generated output files
 Keil/Listings/*
 Keil/Objects/*
+Keil/_build*/
+_build/
 
 # Debugger files
 # define exception below if needed
@@ -80,7 +82,9 @@ Keil/Objects/*
 # !my_customized_scatter_file.sct
 
 !SDK/*/components/softdevice/*/hex/*.hex
-_build/
+!tools/bootloader/*.hex
+!tools/bin/*.exe
+!tools/*.bat
 RTE_Components.h
 EventRecorderStub.scvd
 JLinkLog.txt
