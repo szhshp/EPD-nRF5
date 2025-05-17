@@ -3,10 +3,131 @@
 #include "GUI.h"
 #include <stdio.h>
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define GFX_printf_styled(gfx, fg, bg, font, ...) \
             GFX_setTextColor(gfx, fg, bg);        \
             GFX_setFont(gfx, font);               \
             GFX_printf(gfx, __VA_ARGS__);
+
+typedef struct {
+    uint8_t month;
+    uint8_t day;
+    char name[10]; // 3x3+1
+} Festival;
+
+static const Festival festivals[] = {
+    { 1,  1, "元旦节"},
+    { 2, 14, "情人节"},
+    { 3,  8, "妇女节"},
+    { 3, 12, "植树节"},
+    { 4,  1, "愚人节"},
+    { 5,  1, "劳动节"},
+    { 5,  4, "青年节"},
+    { 6,  1, "儿童节"},
+    { 7,  1, "建党节"},
+    { 8,  1, "建军节"},
+    { 9, 10, "教师节"},
+    {10,  1, "国庆节"},
+    {11,  1, "万圣节"},
+    {12, 24, "平安夜"},
+    {12, 25, "圣诞节"},
+};
+
+static const Festival festivals_lunar[] = {
+    { 1,  1, "春节"  },
+    { 1, 15, "元宵节"},
+    { 2,  2, "龙抬头"},
+    { 5,  5, "端午节"},
+    { 7,  7, "七夕节"},
+    { 7, 15, "中元节"},
+    { 8, 15, "中秋节"},
+    { 9,  9, "重阳节"},
+    {10,  1, "寒衣节"},
+    {12,  8, "腊八节"},
+    {12, 30, "除夕"  },
+};
+
+// 放假和调休数据，每年更新
+#define HOLIDAY_YEAR 2025
+static const uint16_t holidays[] = {
+    0x0101, 0x111A, 0x011C, 0x011D, 0x011E, 0x011F, 0x0201, 0x0202,
+    0x0202, 0x0203, 0x0204, 0x1208, 0x0404, 0x0405, 0x0406, 0x141B,
+    0x0501, 0x0502, 0x0503, 0x0504, 0x0505, 0x051F, 0x0601, 0x0602,
+    0x191C, 0x0A01, 0x0A02, 0x0A03, 0x0A04, 0x0A05, 0x0A06, 0x0A07,
+    0x0A08, 0x1A0B,
+};
+
+static bool GetHoliday(uint8_t mon, uint8_t day, bool *work)
+{
+    for (uint8_t i = 0; i < ARRAY_SIZE(holidays); i++) {
+        if (((holidays[i] >> 8) & 0xF) == mon && (holidays[i] & 0xFF) == day) {
+            *work = ((holidays[i] >> 12) & 0xF) > 0;
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool GetFestival(uint16_t year, uint8_t mon, uint8_t day, uint8_t week,
+                        struct Lunar_Date *Lunar, char *festival)
+{
+    // 农历节日
+    for (uint8_t i = 0; i < ARRAY_SIZE(festivals_lunar); i++) {
+        if (Lunar->Month == festivals_lunar[i].month && Lunar->Date == festivals_lunar[i].day) {
+            strcpy(festival, festivals_lunar[i].name);
+            return true;
+        }
+    }
+
+    // 除夕：春节前一天（12/29 或 12/30），12/30 已在上面判断
+    if (Lunar->Month == 12 && Lunar->Date == 29) {
+        struct Lunar_Date nextLunar;
+        struct devtm tm = {year, mon, day, 0, 0, 0, week};
+        transformTime(transformTimeStruct(&tm) + 86400, &tm);
+        LUNAR_SolarToLunar(&nextLunar, tm.tm_year + YEAR0, tm.tm_mon + 1, tm.tm_mday);
+        if (nextLunar.Month == 1 && nextLunar.Date == 1) {
+            strcpy(festival, "除夕");
+            return true;
+        }
+    }
+    // 母亲节: 五月第二个星期日
+    if (mon == 5 && week == 0 && day >= 8 && day <= 14) {
+        strcpy(festival, "母亲节");
+        return true;
+    }
+    // 父亲节: 六月第三个星期日
+    if (mon == 6 && week == 0 && day >= 15 && day <= 21) {
+        strcpy(festival, "父亲节");
+        return true;
+    }
+    // 感恩节：十一月第四个星期四
+    if (mon == 11 && week == 3 && day >= 22 && day <= 28) {
+        strcpy(festival, "感恩节");
+        return true;
+    }
+
+    // 公历节日
+    for (uint8_t i = 0; i < ARRAY_SIZE(festivals); i++) {
+        if (mon == festivals[i].month && day == festivals[i].day) {
+            strcpy(festival, festivals[i].name);
+            return true;
+        }
+    }
+
+    // 二十四节气
+    uint8_t JQdate;
+    if (GetJieQi(year, mon, day, &JQdate) && JQdate == day) {
+        uint8_t JQ = (mon - 1) * 2;
+        if (day >= 15) JQ++;
+        if (JQ == 6) // 清明
+            sprintf(festival, "%s节", JieQiStr[JQ]);
+        else
+            strcpy(festival, JieQiStr[JQ]);
+        return true;
+    }
+
+    return false;
+}
 
 static void DrawBattery(Adafruit_GFX *gfx, int16_t x, int16_t y, float voltage)
 {
@@ -75,16 +196,18 @@ static void DrawMonthDays(Adafruit_GFX *gfx, tm_t *tm, struct Lunar_Date *Lunar)
     uint8_t monthDayRows = 1 + (monthMaxDays - (7 - firstDayWeek) + 6) / 7;
 
     for (uint8_t i = 0; i < monthMaxDays; i++) {
+        uint16_t year = tm->tm_year + YEAR0;
+        uint8_t month = tm->tm_mon + 1;
         uint8_t day = i + 1;
 
-        int16_t w = (firstDayWeek + i) % 7;
-        bool weekend = (w  == 0) || (w == 6);
+        int16_t week = (firstDayWeek + i) % 7;
+        bool weekend = (week  == 0) || (week == 6);
 
-        int16_t x = 22 + w * 55;
+        int16_t x = 22 + week * 55;
         int16_t y = (monthDayRows > 5 ? 69 : 72) + (firstDayWeek + i) / 7 * (monthDayRows > 5 ? 39 : 48);
 
         if (day == tm->tm_mday) {
-            GFX_fillCircle(gfx, x + 11, y + (monthDayRows > 5 ? 10 : 12), 20, GFX_RED);
+            GFX_fillCircle(gfx, x + 11, y + (monthDayRows > 5 ? 10 : 12), 22, GFX_RED);
             GFX_setTextColor(gfx, GFX_WHITE, GFX_RED);
         } else {
             GFX_setTextColor(gfx, weekend ? GFX_RED : GFX_BLACK, GFX_WHITE);
@@ -93,21 +216,31 @@ static void DrawMonthDays(Adafruit_GFX *gfx, tm_t *tm, struct Lunar_Date *Lunar)
         GFX_setFont(gfx, u8g2_font_helvB14_tn);
         GFX_setCursor(gfx, x + (day < 10 ? 6 : 2), y + 10);
         GFX_printf(gfx, "%d", day);
-
+        
         GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
-        GFX_setCursor(gfx, x, y + 24);
-        uint8_t JQdate;
-        if (GetJieQi(tm->tm_year + YEAR0, tm->tm_mon + 1, day, &JQdate) && JQdate == day) {
-            uint8_t JQ = (tm->tm_mon + 1 - 1) * 2;
-            if (day >= 15) JQ++;
+        LUNAR_SolarToLunar(Lunar, year, month, day);
+
+        char festival[10] = {0};
+        if (GetFestival(year, month, day, week, Lunar, festival)) {
             if (day != tm->tm_mday) GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
-            GFX_printf(gfx, "%s", JieQiStr[JQ]);
+            GFX_setCursor(gfx, strlen(festival) > 6 ? x - 6 : x, y + 24);
+            GFX_printf(gfx, "%s", festival);
         } else {
-            LUNAR_SolarToLunar(Lunar, tm->tm_year + YEAR0, tm->tm_mon + 1, day);
+            GFX_setCursor(gfx, x, y + 24);
             if (Lunar->Date == 1)
                 GFX_printf(gfx, "%s", Lunar_MonthString[Lunar->Month]);
             else
                 GFX_printf(gfx, "%s", Lunar_DateString[Lunar->Date]);
+        }
+        bool work = false;
+        if (year == HOLIDAY_YEAR && GetHoliday(month, day, &work)) {
+            if (day == tm->tm_mday) {
+                GFX_fillCircle(gfx, x + 30, y + 1, 8, GFX_WHITE);
+                GFX_drawCircle(gfx, x + 30, y + 1, 8, GFX_RED);
+            }
+            GFX_setTextColor(gfx, work ? GFX_BLACK : GFX_RED, GFX_WHITE);
+            GFX_setCursor(gfx, x + 25, y + 6);
+            GFX_printf(gfx, "%s", work ? "班" : "休");
         }
     }
 }
