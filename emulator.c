@@ -7,7 +7,7 @@
 
 #define BITMAP_WIDTH   400
 #define BITMAP_HEIGHT  300
-#define WINDOW_WIDTH   400
+#define WINDOW_WIDTH   420
 #define WINDOW_HEIGHT  340
 #define WINDOW_TITLE   TEXT("Emurator")
 
