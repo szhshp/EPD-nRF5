@@ -364,7 +364,9 @@ function clear_canvas() {
   if(confirm('确认清除画布内容?')) {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return true;
   }
+  return false;
 }
 
 function convert_dithering() {
