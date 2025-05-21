@@ -36,6 +36,7 @@
 #include "app_timer.h"
 #include "app_scheduler.h"
 #include "nrf_drv_gpiote.h"
+#include "nrf_drv_wdt.h"
 #include "nrf_pwr_mgmt.h"
 #include "EPD_service.h"
 
@@ -95,6 +96,7 @@ static ble_uuid_t                        m_adv_uuids[] = {{BLE_UUID_EPD_SVC, \
 BLE_EPD_DEF(m_epd);                                                                     /**< Structure to identify the EPD Service. */
 static uint32_t                          m_timestamp = 1735689600;                      /**< Current timestamp. */
 APP_TIMER_DEF(m_clock_timer_id);                                                        /**< Clock timer. */
+static nrf_drv_wdt_channel_id            m_wdt_channel_id;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -711,8 +713,21 @@ static void power_management_init(void)
  */
 static void idle_state_handle(void)
 {
+    if (m_timestamp % 30 == 0) {
+        NRF_LOG_DEBUG("Feed WDT\n");
+        nrf_drv_wdt_channel_feed(m_wdt_channel_id);
+    }
+
     if (NRF_LOG_PROCESS() == false)
         nrf_pwr_mgmt_run();
+}
+
+/**
+ * @brief WDT events handler.
+ */
+void wdt_event_handler(void)
+{
+    //NOTE: The max amount of time we can spend in WDT interrupt is two cycles of 32768[Hz] clock - after that, reset occurs
 }
 
 /**@brief Function for application main entry.
@@ -722,6 +737,12 @@ int main(void)
     log_init();
 
     NRF_LOG_DEBUG("init..\n");
+    
+    // Configure WDT.
+    nrf_drv_wdt_config_t config = NRF_DRV_WDT_DEAFULT_CONFIG;
+    APP_ERROR_CHECK(nrf_drv_wdt_init(&config, wdt_event_handler));
+    APP_ERROR_CHECK(nrf_drv_wdt_channel_alloc(&m_wdt_channel_id));
+    nrf_drv_wdt_enable();
 
     timers_init();
     power_management_init();
