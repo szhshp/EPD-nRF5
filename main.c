@@ -97,6 +97,7 @@ BLE_EPD_DEF(m_epd);                                                             
 static uint32_t                          m_timestamp = 1735689600;                      /**< Current timestamp. */
 APP_TIMER_DEF(m_clock_timer_id);                                                        /**< Clock timer. */
 static nrf_drv_wdt_channel_id            m_wdt_channel_id;
+static uint32_t                          m_wdt_last_feed_time = 0;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -713,9 +714,10 @@ static void power_management_init(void)
  */
 static void idle_state_handle(void)
 {
-    if (m_timestamp % 30 == 0) {
+    if (m_timestamp - m_wdt_last_feed_time >= 30) {
         NRF_LOG_DEBUG("Feed WDT\n");
         nrf_drv_wdt_channel_feed(m_wdt_channel_id);
+        m_wdt_last_feed_time = m_timestamp;
     }
 
     if (NRF_LOG_PROCESS() == false)
