@@ -101,7 +101,7 @@ static bool GetFestival(uint16_t year, uint8_t mon, uint8_t day, uint8_t week,
         return true;
     }
     // 感恩节：十一月第四个星期四
-    if (mon == 11 && week == 3 && day >= 22 && day <= 28) {
+    if (mon == 11 && week == 4 && day >= 22 && day <= 28) {
         strcpy(festival, "感恩节");
         return true;
     }
