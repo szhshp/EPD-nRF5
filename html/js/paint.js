@@ -15,30 +15,38 @@ let dragOffsetY = 0;
 let textBold = false; // Track if text should be bold
 let textItalic = false; // Track if text should be italic
 
+function setCanvasTitle(title) {
+  const canvasTitle = document.querySelector('.canvas-title');
+  if (canvasTitle) {
+    canvasTitle.innerText = title;
+    canvasTitle.style.display = title && title !== '' ? 'block' : 'none';
+  }
+}
+
 function initPaintTools() {
   document.getElementById('brush-mode').addEventListener('click', () => {
     if (currentTool === 'brush') {
-      setActiveTool(null);
+      setActiveTool(null, '');
     } else {
-      setActiveTool('brush');
+      setActiveTool('brush', '画笔模式');
       brushColor = document.getElementById('brush-color').value;
     }
   });
   
   document.getElementById('eraser-mode').addEventListener('click', () => {
     if (currentTool === 'eraser') {
-      setActiveTool(null);
+      setActiveTool(null, '');
     } else {
-      setActiveTool('eraser');
+      setActiveTool('eraser', '橡皮擦');
       brushColor = "#FFFFFF";
     }
   });
 
   document.getElementById('text-mode').addEventListener('click', () => {
     if (currentTool === 'text') {
-      setActiveTool(null);
+      setActiveTool(null, '');
     } else {
-      setActiveTool('text');
+      setActiveTool('text', '插入文字');
       brushColor = document.getElementById('brush-color').value;
     }
   });
@@ -90,13 +98,11 @@ function initPaintTools() {
   updateToolUI();
 }
 
-function setActiveTool(tool) {
+function setActiveTool(tool, title) {
   currentTool = tool;
   updateToolUI();
 
-  // clear and hide tooltip
-  document.querySelector('.canvas-tooltip').innerText = '';
-  document.querySelector('.canvas-tooltip').style.display = 'none';
+  setCanvasTitle(title);
 
   // Cancel any pending text placement
   cancelTextPlacement();
@@ -330,8 +336,7 @@ function startTextPlacement() {
   isTextPlacementMode = true;
 
   // Add visual feedback
-  document.querySelector('.canvas-tooltip').style.display = 'block';
-  document.querySelector('.canvas-tooltip').innerText = '点击画布放置文字';
+  setCanvasTitle('点击画布放置文字');
   canvas.classList.add('text-placement-mode');
 }
 
@@ -388,8 +393,7 @@ function placeText(e) {
   document.getElementById('text-input').value = '';
   isTextPlacementMode = false;
   canvas.classList.remove('text-placement-mode');
-  document.querySelector('.canvas-tooltip').style.display = 'block';
-  document.querySelector('.canvas-tooltip').innerText = '鼠标拖动新添加文字可调整位置';
+  setCanvasTitle('拖动新添加文字可调整位置');
 }
 
 function redrawTextElements() {
