@@ -39,6 +39,7 @@
 #include "nrf_drv_wdt.h"
 #include "nrf_pwr_mgmt.h"
 #include "EPD_service.h"
+#include "main.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -113,6 +114,30 @@ static uint32_t                          m_wdt_last_feed_time = 0;
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
+}
+
+// return current timestamp
+uint32_t timestamp(void)
+{
+    return m_timestamp;
+}
+
+// set the timestamp
+void set_timestamp(uint32_t timestamp)
+{
+    app_timer_stop(m_clock_timer_id);
+    m_timestamp = timestamp;
+    app_timer_start(m_clock_timer_id, CLOCK_TIMER_INTERVAL, NULL);
+}
+
+// reload the wdt channel
+void app_feed_wdt(void)
+{
+    if (m_timestamp - m_wdt_last_feed_time >= 30) {
+        NRF_LOG_DEBUG("Feed WDT\n");
+        nrf_drv_wdt_channel_feed(m_wdt_channel_id);
+        m_wdt_last_feed_time = m_timestamp;
+    }
 }
 
 #if defined(S112)
@@ -674,19 +699,6 @@ static void advertising_init(void)
 #endif
 }
 
-// return current timestamp
-uint32_t timestamp(void)
-{
-    return m_timestamp;
-}
-
-void set_timestamp(uint32_t timestamp)
-{
-    app_timer_stop(m_clock_timer_id);
-    m_timestamp = timestamp;
-    app_timer_start(m_clock_timer_id, CLOCK_TIMER_INTERVAL, NULL);
-}
-
 /**@brief Function for initializing the nrf log module.
  */
 static void log_init(void)
@@ -714,11 +726,7 @@ static void power_management_init(void)
  */
 static void idle_state_handle(void)
 {
-    if (m_timestamp - m_wdt_last_feed_time >= 30) {
-        NRF_LOG_DEBUG("Feed WDT\n");
-        nrf_drv_wdt_channel_feed(m_wdt_channel_id);
-        m_wdt_last_feed_time = m_timestamp;
-    }
+    app_feed_wdt();
 
     if (NRF_LOG_PROCESS() == false)
         nrf_pwr_mgmt_run();
@@ -730,6 +738,8 @@ static void idle_state_handle(void)
 void wdt_event_handler(void)
 {
     //NOTE: The max amount of time we can spend in WDT interrupt is two cycles of 32768[Hz] clock - after that, reset occurs
+    NRF_LOG_ERROR("WDT Rest!\r\n");
+    NRF_LOG_FINAL_FLUSH();
 }
 
 /**@brief Function for application main entry.
@@ -737,6 +747,11 @@ void wdt_event_handler(void)
 int main(void)
 {
     log_init();
+
+    if (nrf_power_resetreas_get() & NRF_POWER_RESETREAS_DOG_MASK) {
+        NRF_LOG_DEBUG("!!!reset from WDT!!!\n");
+        nrf_power_resetreas_clear(NRF_POWER_RESETREAS_DOG_MASK);
+    }
 
     NRF_LOG_DEBUG("init..\n");
     

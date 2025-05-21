@@ -18,6 +18,7 @@
 #include "nrf_pwr_mgmt.h"
 #include "app_scheduler.h"
 #include "EPD_service.h"
+#include "main.h"
 #include "nrf_log.h"
 
 #if defined(S112)
@@ -30,11 +31,6 @@
 #ifndef EPD_CFG_DEFAULT
 #define EPD_CFG_DEFAULT {0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x03, 0x09, 0x03}
 #endif
-
-// defined in main.c
-extern uint32_t timestamp(void);
-extern void set_timestamp(uint32_t timestamp);
-extern void sleep_mode_enter(void);
 
 static void epd_gui_update(void * p_event_data, uint16_t event_size)
 {
@@ -54,6 +50,8 @@ static void epd_gui_update(void * p_event_data, uint16_t event_size)
     DrawGUI(&data, epd->drv->write_image, p_epd->display_mode);
     epd->drv->refresh();
     EPD_GPIO_Uninit();
+
+    app_feed_wdt();
 }
 
 /**@brief Function for handling the @ref BLE_GAP_EVT_CONNECTED event from the S110 SoftDevice.

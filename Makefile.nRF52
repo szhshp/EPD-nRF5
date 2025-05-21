@@ -119,7 +119,8 @@ INC_FOLDERS += \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT) \
   $(PROJ_DIR)/EPD \
-  $(PROJ_DIR)/GUI
+  $(PROJ_DIR)/GUI \
+  $(PROJ_DIR)
 
 # Libraries common to all targets
 LIB_FILES += \
