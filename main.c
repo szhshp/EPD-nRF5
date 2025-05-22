@@ -99,6 +99,7 @@ static uint32_t                          m_timestamp = 1735689600;              
 APP_TIMER_DEF(m_clock_timer_id);                                                        /**< Clock timer. */
 static nrf_drv_wdt_channel_id            m_wdt_channel_id;
 static uint32_t                          m_wdt_last_feed_time = 0;
+static uint32_t                          m_resetreas;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -280,6 +281,8 @@ static void application_timers_start(void)
 void sleep_mode_enter(void)
 {
     NRF_LOG_DEBUG("Entering deep sleep mode\n");
+    NRF_LOG_FINAL_FLUSH();
+    nrf_delay_ms(100);
 
     ble_epd_sleep_prepare(&m_epd);
     nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_GOTO_SYSOFF);
@@ -748,13 +751,12 @@ int main(void)
 {
     log_init();
 
-    if (nrf_power_resetreas_get() & NRF_POWER_RESETREAS_DOG_MASK) {
-        NRF_LOG_DEBUG("!!!reset from WDT!!!\n");
-        nrf_power_resetreas_clear(NRF_POWER_RESETREAS_DOG_MASK);
-    }
+    // Save reset reason.
+    m_resetreas = NRF_POWER->RESETREAS;
+    NRF_POWER->RESETREAS |= NRF_POWER->RESETREAS;
 
     NRF_LOG_DEBUG("init..\n");
-    
+
     // Configure WDT.
     nrf_drv_wdt_config_t config = NRF_DRV_WDT_DEAFULT_CONFIG;
     APP_ERROR_CHECK(nrf_drv_wdt_init(&config, wdt_event_handler));
@@ -784,6 +786,11 @@ int main(void)
     advertising_start();
 
     NRF_LOG_DEBUG("done.\n");
+
+    if (m_resetreas & NRF_POWER_RESETREAS_DOG_MASK) {
+        m_epd.display_mode = MODE_CALENDAR;
+        ble_epd_on_timer(&m_epd, 0, true);
+    }
 
     for (;;)
     {
