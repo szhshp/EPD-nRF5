@@ -1,6 +1,7 @@
 #include <string.h>
 #include "nordic_common.h"
 #include "fds.h"
+#include "app_scheduler.h"
 #include "EPD_config.h"
 #include "nrf_log.h"
 
@@ -12,20 +13,29 @@ static void fds_evt_handler(fds_evt_t const * const p_fds_evt)
     NRF_LOG_DEBUG("fds evt: id=%d result=%d\n", p_fds_evt->id, p_fds_evt->result);
 }
 
+static void run_fds_gc(void * p_event_data, uint16_t event_size)
+{
+    NRF_LOG_DEBUG("run garbage collection (fds_gc)\n");
+    fds_gc();
+}
+
 void epd_config_init(epd_config_t *cfg)
 {
     ret_code_t ret;
 
     ret = fds_register(fds_evt_handler);
     if (ret != NRF_SUCCESS) {
-        NRF_LOG_ERROR("fds_register failed!\n");
+        NRF_LOG_ERROR("fds_register failed, code=%d\n", ret);
         return;
     }
 
     ret = fds_init();
     if (ret != NRF_SUCCESS) {
-        NRF_LOG_ERROR("fds init failed!\n");
+        NRF_LOG_ERROR("fds_init failed, code=%d\n", ret);
+        return;
     }
+
+    run_fds_gc(NULL, 0);
 }
 
 void epd_config_read(epd_config_t *cfg)
@@ -82,12 +92,15 @@ void epd_config_write(epd_config_t *cfg)
         ret = fds_record_write(&record_desc, &record);
 
     if (ret != NRF_SUCCESS) {
-        NRF_LOG_ERROR("epd_config_save: record write/update failed!\n");
+        NRF_LOG_ERROR("epd_config_save: record write/update failed, code=%d\n", ret);
+        if (ret == FDS_ERR_NO_SPACE_IN_FLASH)
+            app_sched_event_put(NULL, 0, run_fds_gc);
     }
 }
 
 void epd_config_clear(epd_config_t *cfg)
 {
+    ret_code_t          ret;
     fds_record_desc_t   record_desc;
     fds_find_token_t    ftok;
 
@@ -97,7 +110,10 @@ void epd_config_clear(epd_config_t *cfg)
         return;
     }
 
-    fds_record_delete(&record_desc);
+    ret = fds_record_delete(&record_desc);
+    if (ret != NRF_SUCCESS) {
+        NRF_LOG_ERROR("fds_record_delete failed, code=%d\n", ret);
+    }
 }
 
 bool epd_config_empty(epd_config_t *cfg)
