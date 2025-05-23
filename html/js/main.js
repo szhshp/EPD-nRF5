@@ -122,12 +122,15 @@ async function syncTime(mode) {
   ]);
   if(await write(EpdCmd.SET_TIME, data)) {
     addLog("时间已同步！");
+    addLog("屏幕刷新完成前请不要操作。");
   }
 }
 
 async function clearScreen() {
   if(confirm('确认清除屏幕内容?')) {
     await write(EpdCmd.CLEAR);
+    addLog("清屏指令已发送！");
+    addLog("屏幕刷新完成前请不要操作。");
   }
 }
 
@@ -163,6 +166,7 @@ async function sendimg() {
   const sendTime = (new Date().getTime() - startTime) / 1000.0;
   addLog(`发送完成！耗时: ${sendTime}s`);
   setStatus(`发送完成！耗时: ${sendTime}s`);
+  addLog("屏幕刷新完成前请不要操作。");
   setTimeout(() => {
     status.parentElement.style.display = "none";
   }, 5000);
