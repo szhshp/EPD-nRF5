@@ -2840,7 +2840,7 @@
 // <0=> Pause in SLEEP and HALT 
 
 #ifndef WDT_CONFIG_BEHAVIOUR
-#define WDT_CONFIG_BEHAVIOUR 1
+#define WDT_CONFIG_BEHAVIOUR 0
 #endif
 
 // <o> WDT_CONFIG_RELOAD_VALUE - Reload value  <15-4294967295> 
