@@ -31,7 +31,7 @@
 typedef struct
 {
     void (*init)();                                   /**< Initialize the e-Paper register */
-    void (*clear)(void);                              /**< Clear screen */
+    void (*clear)(bool refresh);                      /**< Clear screen */
     void (*write_image)(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h); /**< write image */
     void (*refresh)(void);                            /**< Sends the image buffer in RAM to e-Paper and displays */
     void (*sleep)(void);                              /**< Enter sleep mode */

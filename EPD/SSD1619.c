@@ -118,7 +118,7 @@ static void SSD1619_Refresh(void)
     SSD1619_Update(0x83); // power off
 }
 
-void SSD1619_Clear(void)
+void SSD1619_Clear(bool refresh)
 {
     epd_model_t *EPD = epd_get();
     uint16_t Width = (EPD->width + 7) / 8;
@@ -138,7 +138,7 @@ void SSD1619_Clear(void)
         }
     }
 
-    SSD1619_Refresh();
+    if (refresh) SSD1619_Refresh();
 }
 
 void SSD1619_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h)

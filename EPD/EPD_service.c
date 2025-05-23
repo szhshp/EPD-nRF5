@@ -115,7 +115,7 @@ static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t l
 
       case EPD_CMD_CLEAR:
           p_epd->display_mode = MODE_NONE;
-          p_epd->epd->drv->clear();
+          p_epd->epd->drv->clear(length > 1 ? p_data[1] : true);
           break;
 
       case EPD_CMD_SEND_COMMAND:

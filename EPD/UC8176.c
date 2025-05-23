@@ -141,11 +141,11 @@ static void UC8176_Write_RAM(uint8_t cmd, uint8_t value)
     }
 }
 
-void UC8176_Clear(void)
+void UC8176_Clear(bool refresh)
 {
     UC8176_Write_RAM(CMD_DTM1, 0xFF);
     UC8176_Write_RAM(CMD_DTM2, 0xFF);
-    UC8176_Refresh();
+    if (refresh) UC8176_Refresh();
 }
 
 static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
