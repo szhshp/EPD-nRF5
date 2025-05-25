@@ -82,16 +82,6 @@ void SSD1619_Init()
     EPD_WriteCommand(CMD_SW_RESET);
     SSD1619_WaitBusy(200);
 
-    EPD_WriteCommand(CMD_ANALOG_BLOCK_CTRL);
-    EPD_WriteByte(0x54);
-    EPD_WriteCommand(CMD_DIGITAL_BLOCK_CTRL);
-    EPD_WriteByte(0x3B);
-
-    EPD_WriteCommand(CMD_DRIVER_CTRL);
-    EPD_WriteByte((EPD->height - 1) % 256);
-    EPD_WriteByte((EPD->height - 1) / 256);
-    EPD_WriteByte(0x00);
-
     EPD_WriteCommand(CMD_BORDER_CTRL);
     EPD_WriteByte(0x01);
     EPD_WriteCommand(CMD_TSENSOR_CTRL);
@@ -105,8 +95,8 @@ static void SSD1619_Refresh(void)
     epd_model_t *EPD = epd_get();
 
     EPD_WriteCommand(CMD_DISP_CTRL1);
-    EPD_WriteByte(0x80); // Inverse RED RAM
-    EPD_WriteByte(0x00); // Single chip application
+    EPD_WriteByte(EPD->bwr ? 0x80 : 0x40);
+    EPD_WriteByte(0x00);
 
     NRF_LOG_DEBUG("[EPD]: refresh begin\n");
     NRF_LOG_DEBUG("[EPD]: temperature: %d\n", SSD1619_Read_Temp());

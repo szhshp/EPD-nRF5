@@ -46,16 +46,6 @@
 #define CMD_CCSET   0xE0        // Cascade Setting 
 #define CMD_TSSET   0xE5        // Force Temperauture
 
-// PSR registers
-#define PSR_RES1      BIT(7)
-#define PSR_RES0      BIT(6)
-#define PSR_REG       BIT(5)
-#define PSR_BWR       BIT(4)
-#define PSR_UD        BIT(3)
-#define PSR_SHL       BIT(2)
-#define PSR_SHD       BIT(1)
-#define PSR_RST       BIT(0)
-
 static void UC8176_WaitBusy(uint16_t timeout)
 {
     EPD_WaitBusy(LOW, timeout);
@@ -104,24 +94,12 @@ void UC8176_Refresh(void)
 
 void UC8176_Init()
 {
+    epd_model_t *EPD = epd_get();
+
     EPD_Reset(HIGH, 10);
 
-    epd_model_t *EPD = epd_get();
-    uint8_t psr = PSR_UD | PSR_SHL | PSR_SHD | PSR_RST;
-    if (!EPD->bwr) psr |= PSR_BWR;
-    if (EPD->width == 320 && EPD->height == 300) {
-        psr |= PSR_RES0;
-    } else if (EPD->width == 320 && EPD->height == 240) {
-        psr |= PSR_RES1;
-    } else if (EPD->width == 200 && EPD->height == 300) {
-        psr |= PSR_RES1 | PSR_RES0;
-    } else {
-        // default to 400x300
-    }
-
-    NRF_LOG_DEBUG("[EPD]: PSR=%02x\n", psr);
     EPD_WriteCommand(CMD_PSR);
-    EPD_WriteByte(psr);
+    EPD_WriteByte(EPD->bwr ? 0x0F : 0x1F);
 
     EPD_WriteCommand(CMD_CDI);
     EPD_WriteByte(EPD->bwr ? 0x77 : 0x97);
