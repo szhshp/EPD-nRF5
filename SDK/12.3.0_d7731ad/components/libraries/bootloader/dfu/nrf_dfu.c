@@ -50,6 +50,7 @@
 #include "boards.h"
 #include "nrf_bootloader_info.h"
 #include "nrf_dfu_req_handler.h"
+#include "nrf_wdt.h"
 
 #define SCHED_MAX_EVENT_DATA_SIZE       MAX(APP_TIMER_SCHED_EVT_SIZE, 0)                        /**< Maximum size of scheduler events. */
 
@@ -101,11 +102,28 @@ static void scheduler_init(void)
 }
 
 
+static void wdt_feed(void)
+{
+    if (nrf_wdt_started())
+    {
+        for (nrf_wdt_rr_register_t i = NRF_WDT_RR0; i < NRF_WDT_RR7; i++)
+        {
+            if (nrf_wdt_reload_request_is_enabled(i))
+            {
+                nrf_wdt_reload_request_set(i);
+            }
+        }
+    }
+}
+
 static void wait_for_event()
 {
     // Transport is waiting for event?
     while(true)
     {
+        // Feed the watchdog if enabled
+        wdt_feed();
+
         // Can't be emptied like this because of lack of static variables
         app_sched_execute();
     }
