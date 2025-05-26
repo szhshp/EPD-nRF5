@@ -30,20 +30,47 @@
 #include "EPD_driver.h"
 #include "nrf_log.h"
 
-// commands used by this driver
+// Driver command list.
 #define CMD_PSR     0x00        // Panel Setting
+#define CMD_PWR     0x01        // Power Setting
 #define CMD_POF     0x02        // Power OFF
+#define CMD_PFS     0x03        // Power OFF Sequence Setting
 #define CMD_PON     0x04        // Power ON
+#define CMD_PMES    0x05        // Power ON Measure
+#define CMD_BTST    0x06        // Booster Soft Start
 #define CMD_DSLP    0x07        // Deep sleep
 #define CMD_DTM1    0x10        // Display Start Transmission 1
+#define CMD_DSP     0x11        // Data Stop
 #define CMD_DRF     0x12        // Display Refresh
-#define CMD_DTM2    0x13        // Display Start transmission 2 
+#define CMD_DTM2    0x13        // Display Start transmission 2
+#define CMD_LUTC    0x20        // VCOM LUT (LUTC)
+#define CMD_LUTWW   0x21        // W2W LUT (LUTWW) 
+#define CMD_LUTBW   0x22        // B2W LUT (LUTBW / LUTR)
+#define CMD_LUTWB   0x23        // W2B LUT (LUTWB / LUTW)
+#define CMD_LUTBB   0x24        // B2B LUT (LUTBB / LUTB)
+#define CMD_PLL     0x30        // PLL control
 #define CMD_TSC     0x40        // Temperature Sensor Calibration
-#define CMD_CDI     0x50        // Vcom and data interval setting 
+#define CMD_TSE     0x41        // Temperature Sensor Selection
+#define CMD_TSW     0x42        // Temperature Sensor Write
+#define CMD_TSR     0x43        // Temperature Sensor Read
+#define CMD_CDI     0x50        // Vcom and data interval setting
+#define CMD_LPD     0x51        // Lower Power Detection
+#define CMD_TCON    0x60        // TCON setting
+#define CMD_TRES    0x61        // Resolution setting
+#define CMD_GSST    0x65        // GSST Setting
+#define CMD_REV     0x70        // Revision
+#define CMD_FLG     0x71        // Get Status
+#define CMD_AMV     0x80        // Auto Measurement Vcom
+#define CMD_VV      0x81        // Read Vcom Value
+#define CMD_VDCS    0x82        // VCM_DC Setting
 #define CMD_PTL     0x90        // Partial Window
 #define CMD_PTIN    0x91        // Partial In
 #define CMD_PTOUT   0x92        // Partial Out
-#define CMD_CCSET   0xE0        // Cascade Setting 
+#define CMD_PGM     0xA0        // Program Mode
+#define CMD_APG     0xA1        // Active Progrmming
+#define CMD_ROTP    0xA2        // Read OTP
+#define CMD_CCSET   0xE0        // Cascade Setting
+#define CMD_PWS     0xE3        // Power Saving
 #define CMD_TSSET   0xE5        // Force Temperauture
 
 static void UC8176_WaitBusy(uint16_t timeout)

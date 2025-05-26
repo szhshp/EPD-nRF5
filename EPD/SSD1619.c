@@ -5,28 +5,58 @@
 #include "EPD_driver.h"
 #include "nrf_log.h"
 
-// commands used by this driver
-#define CMD_DRIVER_CTRL           0x01        // Driver Output control
-#define CMD_BOOSTER_CTRL          0x0C        // Booster Soft start Control
-#define CMD_DEEP_SLEEP            0x10        // Deep Sleep mode 
-#define CMD_DATA_MODE             0x11        // Data Entry mode setting
+// Driver command list.
+#define CMD_GDO_CTR               0x01        // Driver Output control
+#define CMD_GDV_CTRL              0x03        // Gate Driving voltage Control
+#define CMD_SDV_CTRL              0x04        // Source Driving voltage Control
+#define CMD_SOFTSTART             0x0C        // Booster Soft start Control
+#define CMD_GSCAN_START           0x0F        // Gate scan start position
+#define CMD_SLEEP_MODE            0x10        // Deep Sleep mode 
+#define CMD_ENTRY_MODE            0x11        // Data Entry mode setting
 #define CMD_SW_RESET              0x12        // SW RESET
+#define CMD_HV_RD_DETECT          0x14        // HV Ready Detection
+#define CMD_VCI_DETECT            0x15        // VCI Detection
 #define CMD_TSENSOR_CTRL          0x18        // Temperature Sensor Control
 #define CMD_TSENSOR_WRITE         0x1A        // Temperature Sensor Control (Write to temperature register)
 #define CMD_TSENSOR_READ          0x1B        // Temperature Sensor Control (Read from temperature register)
+#define CMD_TSENSOR_WRITE_EXT     0x1C        // Temperature Sensor Control (Write Command to External temperature sensor)
 #define CMD_MASTER_ACTIVATE       0x20        // Master Activation
 #define CMD_DISP_CTRL1            0x21        // Display Update Control 1
 #define CMD_DISP_CTRL2            0x22        // Display Update Control 2
 #define CMD_WRITE_RAM1            0x24        // Write RAM (BW)
 #define CMD_WRITE_RAM2            0x26        // Write RAM (RED)
+#define CMD_READ_RAM              0x27        // Read RAM
+#define CMD_VCOM_SENSE            0x28        // VCOM Sense
+#define CMD_VCOM_SENSE_DURATON    0x29        // VCOM Sense Duration
+#define CMD_PRGM_VCOM_OTP         0x2A        // Program VCOM OTP
 #define CMD_VCOM_CTRL             0x2B        // Write Register for VCOM Control
+#define CMD_VCOM_VOLTAGE          0x2C        // Write VCOM register
+#define CMD_READ_OTP_REG          0x2D        // OTP Register Read for Display Option
+#define CMD_READ_USER_ID          0x2E        // User ID Read
+#define CMD_READ_STATUS           0x2F        // Status Bit Read
+#define CMD_PRGM_WS_OTP           0x30        // Program WS OTP
+#define CMD_LOAD_WS_OTP           0x31        // Load WS OTP
+#define CMD_WRITE_LUT             0x32        // Write LUT register
+#define CMD_READ_LUT              0x33        // Read LUT
+#define CMD_CRC_CALC              0x34        // CRC calculation
+#define CMD_CRC_STATUS            0x35        // CRC Status Read
+#define CMD_PRGM_OTP_SELECTION    0x36        // Program OTP selection
+#define CMD_OTP_SELECTION_CTRL    0x37        // Write OTP selection
+#define CMD_USER_ID_CTRL          0x38        // Write Register for User ID
+#define CMD_OTP_PROG_MODE         0x39        // OTP program mode
+#define CMD_DUMMY_LINE            0x3A        // Set dummy line period
+#define CMD_GATE_LINE_WIDTH       0x3B        // Set Gate line width
 #define CMD_BORDER_CTRL           0x3C        // Border Waveform Control
+#define CMD_RAM_READ_CTRL         0x41        // Read RAM Option
 #define CMD_RAM_XPOS              0x44        // Set RAM X - address Start / End position
 #define CMD_RAM_YPOS              0x45        // Set Ram Y- address Start / End position
+#define CMD_AUTO_WRITE_RED_RAM    0x46        // Auto Write RED RAM for Regular Pattern
+#define CMD_AUTO_WRITE_BW_RAM     0x47        // Auto Write B/W RAM for Regular Pattern
 #define CMD_RAM_XCOUNT            0x4E        // Set RAM X address counter
 #define CMD_RAM_YCOUNT            0x4F        // Set RAM Y address counter
 #define CMD_ANALOG_BLOCK_CTRL     0x74        // Set Analog Block Control
 #define CMD_DIGITAL_BLOCK_CTRL    0x7E        // Set Digital Block Control
+#define CMD_NOP                   0x7F        // NOP
 
 static void SSD1619_WaitBusy(uint16_t timeout)
 {
@@ -56,7 +86,7 @@ void SSD1619_Force_Temp(int8_t value)
 
 static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
-    EPD_WriteCommand(CMD_DATA_MODE); // set ram entry mode
+    EPD_WriteCommand(CMD_ENTRY_MODE); // set ram entry mode
     EPD_WriteByte(0x03);    // x increase, y increase
     EPD_WriteCommand(CMD_RAM_XPOS);
     EPD_WriteByte(x / 8);
@@ -160,7 +190,7 @@ void SSD1619_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y,
 
 void SSD1619_Sleep(void)
 {
-    EPD_WriteCommand(CMD_DEEP_SLEEP);
+    EPD_WriteCommand(CMD_SLEEP_MODE);
     EPD_WriteByte(0x01);
     delay(100);
 }
