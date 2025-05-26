@@ -413,6 +413,23 @@ body.debug-mode .tool-button.active {
     border-color: var(--primary-hover);
 }
 
+input[type=text]:disabled,
+input[type=number]:disabled,
+select:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+body.debug-mode input[type=text]:disabled,
+body.debug-mode input[type=number]:disabled,
+body.debug-mode select:disabled {
+    background-color: #1a1a1a;
+    color: #666;
+    border-color: #2a2a2a;
+}
+
 @media (max-width: 768px) {
     .flex-container {
         flex-direction: column;

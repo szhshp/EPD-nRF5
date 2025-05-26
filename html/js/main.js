@@ -22,6 +22,24 @@ const EpdCmd = {
   CFG_ERASE:  0x99,
 };
 
+function hex2bytes(hex) {
+  for (var bytes = [], c = 0; c < hex.length; c += 2)
+    bytes.push(parseInt(hex.substr(c, 2), 16));
+  return new Uint8Array(bytes);
+}
+
+function bytes2hex(data) {
+  return new Uint8Array(data).reduce(
+    function (memo, i) {
+      return memo + ("0" + i.toString(16)).slice(-2);
+    }, "");
+}
+
+function intToHex(intIn) {
+  let stringOut = ("0000" + intIn.toString(16)).substr(-4)
+  return stringOut.substring(2, 4) + stringOut.substring(0, 2);
+}
+
 function resetVariables() {
   gattServer = null;
   epdService = null;
@@ -324,29 +342,18 @@ function clearLog() {
   document.getElementById("log").innerHTML = '';
 }
 
-function hex2bytes(hex) {
-  for (var bytes = [], c = 0; c < hex.length; c += 2)
-    bytes.push(parseInt(hex.substr(c, 2), 16));
-  return new Uint8Array(bytes);
+function onDitheringChange() {
+  const mode = document.getElementById('dithering').value;
+  const thresholdInput = document.getElementById('threshold');
+  thresholdInput.disabled = (mode === '' || mode.startsWith('bwr'));
+  updateImage(false);
 }
 
-function bytes2hex(data) {
-  return new Uint8Array(data).reduce(
-    function (memo, i) {
-      return memo + ("0" + i.toString(16)).slice(-2);
-    }, "");
-}
-
-function intToHex(intIn) {
-  let stringOut = ("0000" + intIn.toString(16)).substr(-4)
-  return stringOut.substring(2, 4) + stringOut.substring(0, 2);
-}
-
-async function update_image(clear = false) {
+function updateImage(clear = false) {
   const image_file = document.getElementById('image_file');
   if (image_file.files.length == 0) return;
 
-  if (clear) clear_canvas();
+  if (clear) clearCanvas();
 
   const file = image_file.files[0];
   let image = new Image();;
@@ -354,11 +361,11 @@ async function update_image(clear = false) {
   image.onload = function(event) {
     URL.revokeObjectURL(this.src);
     ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
-    convert_dithering()
+    convertDithering()
   }
 }
 
-function clear_canvas() {
+function clearCanvas() {
   if (confirm('清除画布已有内容?')) {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -367,14 +374,15 @@ function clear_canvas() {
   return false;
 }
 
-function convert_dithering() {
+function convertDithering() {
   const mode = document.getElementById('dithering').value;
   if (mode === '') return;
 
   if (mode.startsWith('bwr')) {
     ditheringCanvasByPalette(canvas, bwrPalette, mode);
   } else {
-    dithering(ctx, canvas.width, canvas.height, parseInt(document.getElementById('threshold').value), mode);
+    const threshold = document.getElementById('threshold').value;
+    dithering(ctx, canvas.width, canvas.height, parseInt(threshold), mode);
   }
 }
 

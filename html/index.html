@@ -48,12 +48,12 @@
 		<fieldset>
         	<legend>蓝牙传图</legend>
 			<div class="flex-container">
-				<input type="file" id="image_file" onchange="update_image(true)" accept=".png,.jpg,.bmp,.webp,.jpeg">
+				<input type="file" id="image_file" onchange="updateImage(true)" accept=".png,.jpg,.bmp,.webp,.jpeg">
 			</div>
 			<div class="flex-container">
 				<div class="flex-group">
 					<label for="dithering">取模算法</label>
-					<select id="dithering" title="取模算法" onchange="update_image(false)">
+					<select id="dithering" title="取模算法" onchange="onDitheringChange()">
 						<optgroup data-driver="01|04" label="黑白">
 							<option value="none">二值化</option>
 							<option value="bayer">bayer</option>
@@ -68,7 +68,7 @@
 				</div>
 				<div class="flex-group">
 					<label for="threshold">阈值</label>
-					<input type="number" max="255" min="0" value="125" id="threshold" onchange="update_image(false)">
+					<input type="number" max="255" min="1" value="125" id="threshold" oninput="updateImage(false)">
 				</div>
 				<div class="flex-group debug">
 					<label for="mtusize">MTU</label>
@@ -80,7 +80,7 @@
 			<div class="status-bar"><b>状态：</b><span id="status"></span></div>
 			<div class="flex-container">
 				<div class="flex-group">
-					<button id="clearcanvasbutton" type="button" class="secondary" onclick="clear_canvas()">清除画布</button>
+					<button id="clearcanvasbutton" type="button" class="secondary" onclick="clearCanvas()">清除画布</button>
 					<button id="sendimgbutton" type="button" class="primary" onclick="sendimg()">发送图片</button>
 				</div>
 			</div>

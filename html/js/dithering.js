@@ -4,11 +4,6 @@ const bwrPalette = [
   [255, 0, 0, 255]
 ]
 
-const bwPalette = [
-  [0, 0, 0, 255],
-  [255, 255, 255, 255],
-]
-
 function dithering(ctx, width, height, threshold, type) {
   const bayerThresholdMap = [
     [  15, 135,  45, 165 ],
@@ -26,7 +21,6 @@ function dithering(ctx, width, height, threshold, type) {
     lumB[i] = i*0.114;
   }
   const imageData = ctx.getImageData(0, 0, width, height);
-
   const imageDataLength = imageData.data.length;
 
   // Greyscale luminance (sets r pixels to luminance of rgb)
@@ -38,21 +32,15 @@ function dithering(ctx, width, height, threshold, type) {
   let newPixel, err;
 
   for (let currentPixel = 0; currentPixel <= imageDataLength; currentPixel+=4) {
-    if (type === "gray") {
-      const factor = 255 / (threshold - 1);
-      imageData.data[currentPixel] = Math.round(imageData.data[currentPixel] / factor) * factor;
-    } else if (type ==="none") {
-      // No dithering
+    if (type ==="none") { // No dithering
       imageData.data[currentPixel] = imageData.data[currentPixel] < threshold ? 0 : 255;
-    } else if (type ==="bayer") {
-      // 4x4 Bayer ordered dithering algorithm
+    } else if (type ==="bayer") { // 4x4 Bayer ordered dithering algorithm
       var x = currentPixel/4 % w;
       var y = Math.floor(currentPixel/4 / w);
       var map = Math.floor( (imageData.data[currentPixel] + bayerThresholdMap[x%4][y%4]) / 2 );
       imageData.data[currentPixel] = (map < threshold) ? 0 : 255;
-    } else if (type ==="floydsteinberg") {
-      // Floyda€"Steinberg dithering algorithm
-      newPixel = imageData.data[currentPixel] < 129 ? 0 : 255;
+    } else if (type ==="floydsteinberg") { // Floyda€"Steinberg dithering algorithm
+      newPixel = imageData.data[currentPixel] < threshold ? 0 : 255;
       err = Math.floor((imageData.data[currentPixel] - newPixel) / 16);
       imageData.data[currentPixel] = newPixel;
 
@@ -60,8 +48,7 @@ function dithering(ctx, width, height, threshold, type) {
       imageData.data[currentPixel + 4*w - 4 ] += err*3;
       imageData.data[currentPixel + 4*w     ] += err*5;
       imageData.data[currentPixel + 4*w + 4 ] += err*1;
-    } else {
-      // Bill Atkinson's dithering algorithm
+    } else { // Bill Atkinson's dithering algorithm
       newPixel = imageData.data[currentPixel] < threshold ? 0 : 255;
       err = Math.floor((imageData.data[currentPixel] - newPixel) / 8);
       imageData.data[currentPixel] = newPixel;
@@ -108,36 +95,6 @@ function canvas2bytes(canvas, step = 'bw', invert = false) {
   return arr;
 }
 
-function getColorDistance(rgba1, rgba2) {
-  const [r1, b1, g1] = rgba1;
-  const [r2, b2, g2] = rgba2;
-
-  const rm = (r1 + r2 ) / 2;
-
-  const r = r1 - r2;
-  const g = g1 - g2;
-  const b = b1 - b2;
-
-  return Math.sqrt((2 + rm / 256) * r * r + 4 * g * g + (2 + (255 - rm) / 256) * b * b);
-}
-
-function getNearColor(pixel, palette) {
-  let minDistance = 255 * 255 * 3 + 1;
-  let paletteIndex = 0;
-
-  for (let i = 0; i < palette.length; i++) {
-    const targetColor = palette[i];
-    const distance = getColorDistance(pixel, targetColor);
-    if (distance < minDistance) {
-      minDistance = distance;
-      paletteIndex = i;
-    }
-  }
-
-  return palette[paletteIndex];
-}
-
-
 function getNearColorV2(color, palette) {
   let minDistanceSquared = 255*255 + 255*255 + 255*255 + 1;
 
@@ -153,9 +110,7 @@ function getNearColorV2(color, palette) {
       }
   }
   return palette[bestIndex];
-
 }
-
 
 function updatePixel(imageData, index, color) {
   imageData[index] = color[0];
