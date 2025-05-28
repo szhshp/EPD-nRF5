@@ -79,16 +79,22 @@ void EPD_GPIO_Init(void);
 void EPD_GPIO_Uninit(void);
 
 // SPI
-void EPD_SPI_WriteBytes(uint8_t *value, uint8_t len);
-void EPD_SPI_ReadBytes(uint8_t *value, uint8_t len);
-void EPD_SPI_WriteByte(uint8_t value);
-uint8_t EPD_SPI_ReadByte(void);
+void EPD_SPI_Write(uint8_t *value, uint8_t len);
+void EPD_SPI_Read(uint8_t *value, uint8_t len);
 
 // EPD
-void EPD_WriteCommand(uint8_t Reg);
-void EPD_WriteByte(uint8_t Data);
-void EPD_WriteData(uint8_t *Data, uint8_t Len);
+void EPD_WriteCmd(uint8_t cmd);
+void EPD_WriteData(uint8_t *value, uint8_t len);
+void EPD_ReadData(uint8_t *value, uint8_t len);
+void EPD_WriteByte(uint8_t value);
 uint8_t EPD_ReadByte(void);
+#define EPD_Write(cmd, ...) \
+    do { \
+        uint8_t _data[] = {__VA_ARGS__}; \
+        EPD_WriteCmd(cmd); \
+        EPD_WriteData(_data, sizeof(_data)); \
+    } while (0)
+void EPD_FillRAM(uint8_t cmd, uint8_t value);
 void EPD_Reset(uint32_t value, uint16_t duration);
 void EPD_WaitBusy(uint32_t value, uint16_t timeout);
 

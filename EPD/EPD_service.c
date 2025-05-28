@@ -22,8 +22,8 @@
 #include "nrf_log.h"
 
 #if defined(S112)
-//#define EPD_CFG_DEFAULT {0x14, 0x13, 0x06, 0x05, 0x04, 0x03, 0x02, 0x03, 0xFF, 0x12, 0x07} // 52811
-#define EPD_CFG_DEFAULT {0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x03, 0xFF, 0x0D, 0x02} // 52810
+//#define EPD_CFG_DEFAULT {0x14, 0x13, 0x06, 0x05, 0x04, 0x03, 0x02, 0x02, 0xFF, 0x12, 0x07} // 52811
+#define EPD_CFG_DEFAULT {0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x02, 0xFF, 0x0D, 0x02} // 52810
 #else
 //#define EPD_CFG_DEFAULT {0x05, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x01, 0x07}
 #endif
@@ -120,7 +120,7 @@ static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t l
 
       case EPD_CMD_SEND_COMMAND:
           if (length < 2) return;
-          EPD_WriteCommand(p_data[1]);
+          EPD_WriteCmd(p_data[1]);
           break;
 
       case EPD_CMD_SEND_DATA:
@@ -153,7 +153,7 @@ static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t l
           if (length < 3) return;
           if ((p_data[1] >> 4) == 0x00) {
               bool black = (p_data[1] & 0x0F) == 0x0F;
-              EPD_WriteCommand(black ? p_epd->epd->drv->cmd_write_ram1 : p_epd->epd->drv->cmd_write_ram2);
+              EPD_WriteCmd(black ? p_epd->epd->drv->cmd_write_ram1 : p_epd->epd->drv->cmd_write_ram2);
           }
           EPD_WriteData(&p_data[2], length - 2);
           break;

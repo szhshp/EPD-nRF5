@@ -18,6 +18,7 @@
 #include "nrf_log.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define BUFFER_SIZE 128
 
 // GPIO Pins
 static uint32_t EPD_MOSI_PIN = 5;
@@ -29,6 +30,9 @@ static uint32_t EPD_BUSY_PIN = 12;
 static uint32_t EPD_BS_PIN = 13;
 static uint32_t EPD_EN_PIN = 0xFF;
 static uint32_t EPD_LED_PIN = 0xFF;
+
+// EPD model
+static epd_model_t *EPD = NULL;
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
@@ -149,7 +153,7 @@ void EPD_GPIO_Uninit(void)
 }
 
 // SPI
-void EPD_SPI_WriteBytes(uint8_t *value, uint8_t len)
+void EPD_SPI_Write(uint8_t *value, uint8_t len)
 {
     nrf_gpio_pin_dir_t dir = nrf_gpio_pin_dir_get(EPD_MOSI_PIN);
     if (dir != NRF_GPIO_PIN_DIR_OUTPUT) {
@@ -159,7 +163,7 @@ void EPD_SPI_WriteBytes(uint8_t *value, uint8_t len)
     APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, value, len, NULL, 0));
 }
 
-void EPD_SPI_ReadBytes(uint8_t *value, uint8_t len)
+void EPD_SPI_Read(uint8_t *value, uint8_t len)
 {
     nrf_gpio_pin_dir_t dir = nrf_gpio_pin_dir_get(EPD_MOSI_PIN);
     if (dir != NRF_GPIO_PIN_DIR_INPUT) {
@@ -169,41 +173,52 @@ void EPD_SPI_ReadBytes(uint8_t *value, uint8_t len)
     APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, NULL, 0, value, len));
 }
 
-void EPD_SPI_WriteByte(uint8_t value)
-{
-    EPD_SPI_WriteBytes(&value, 1);
-}
-
-uint8_t EPD_SPI_ReadByte(void)
-{
-    uint8_t data;
-    EPD_SPI_ReadBytes(&data, 1);
-    return data;
-}
-
 // EPD
-void EPD_WriteCommand(uint8_t Reg)
+void EPD_WriteCmd(uint8_t cmd)
 {
     digitalWrite(EPD_DC_PIN, LOW);
-    EPD_SPI_WriteByte(Reg);
+    EPD_SPI_Write(&cmd, 1);
 }
 
-void EPD_WriteByte(uint8_t Data)
+void EPD_WriteData(uint8_t *value, uint8_t len)
 {
     digitalWrite(EPD_DC_PIN, HIGH);
-    EPD_SPI_WriteByte(Data);
+    EPD_SPI_Write(value, len);
 }
 
-void EPD_WriteData(uint8_t *Data, uint8_t Len)
+void EPD_ReadData(uint8_t *value, uint8_t len)
 {
     digitalWrite(EPD_DC_PIN, HIGH);
-    EPD_SPI_WriteBytes(Data, Len);
+    EPD_SPI_Read(value, len);
+}
+
+void EPD_WriteByte(uint8_t value)
+{
+    digitalWrite(EPD_DC_PIN, HIGH);
+    EPD_SPI_Write(&value, 1);
 }
 
 uint8_t EPD_ReadByte(void)
 {
+    uint8_t value;
     digitalWrite(EPD_DC_PIN, HIGH);
-    return EPD_SPI_ReadByte();
+    EPD_SPI_Read(&value, 1);
+    return value;
+}
+
+void EPD_FillRAM(uint8_t cmd, uint8_t value)
+{
+    uint8_t buffer[BUFFER_SIZE];
+    for (uint8_t i = 0; i < BUFFER_SIZE; i++)
+        buffer[i] = value;
+
+    EPD_WriteCmd(cmd);
+    uint16_t remaining = ((EPD->width + 7) / 8) * EPD->height;
+    while (remaining > 0) {
+        uint16_t chunk_size = (remaining > BUFFER_SIZE) ? BUFFER_SIZE : remaining;
+        EPD_WriteData(buffer, chunk_size);
+        remaining -= chunk_size;
+    }
 }
 
 void EPD_Reset(uint32_t value, uint16_t duration)
@@ -327,9 +342,6 @@ static epd_model_t *epd_models[] = {
     &epd_ssd1619_420_bwr,
     &epd_ssd1619_420_bw,
 };
-
-// EPD model
-static epd_model_t *EPD = NULL;
 
 epd_model_t *epd_get(void)
 {

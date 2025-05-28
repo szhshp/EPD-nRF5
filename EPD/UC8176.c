@@ -31,47 +31,47 @@
 #include "nrf_log.h"
 
 // Driver command list.
-#define CMD_PSR     0x00        // Panel Setting
-#define CMD_PWR     0x01        // Power Setting
-#define CMD_POF     0x02        // Power OFF
-#define CMD_PFS     0x03        // Power OFF Sequence Setting
-#define CMD_PON     0x04        // Power ON
-#define CMD_PMES    0x05        // Power ON Measure
-#define CMD_BTST    0x06        // Booster Soft Start
-#define CMD_DSLP    0x07        // Deep sleep
-#define CMD_DTM1    0x10        // Display Start Transmission 1
-#define CMD_DSP     0x11        // Data Stop
-#define CMD_DRF     0x12        // Display Refresh
-#define CMD_DTM2    0x13        // Display Start transmission 2
-#define CMD_LUTC    0x20        // VCOM LUT (LUTC)
-#define CMD_LUTWW   0x21        // W2W LUT (LUTWW) 
-#define CMD_LUTBW   0x22        // B2W LUT (LUTBW / LUTR)
-#define CMD_LUTWB   0x23        // W2B LUT (LUTWB / LUTW)
-#define CMD_LUTBB   0x24        // B2B LUT (LUTBB / LUTB)
-#define CMD_PLL     0x30        // PLL control
-#define CMD_TSC     0x40        // Temperature Sensor Calibration
-#define CMD_TSE     0x41        // Temperature Sensor Selection
-#define CMD_TSW     0x42        // Temperature Sensor Write
-#define CMD_TSR     0x43        // Temperature Sensor Read
-#define CMD_CDI     0x50        // Vcom and data interval setting
-#define CMD_LPD     0x51        // Lower Power Detection
-#define CMD_TCON    0x60        // TCON setting
-#define CMD_TRES    0x61        // Resolution setting
-#define CMD_GSST    0x65        // GSST Setting
-#define CMD_REV     0x70        // Revision
-#define CMD_FLG     0x71        // Get Status
-#define CMD_AMV     0x80        // Auto Measurement Vcom
-#define CMD_VV      0x81        // Read Vcom Value
-#define CMD_VDCS    0x82        // VCM_DC Setting
-#define CMD_PTL     0x90        // Partial Window
-#define CMD_PTIN    0x91        // Partial In
-#define CMD_PTOUT   0x92        // Partial Out
-#define CMD_PGM     0xA0        // Program Mode
-#define CMD_APG     0xA1        // Active Progrmming
-#define CMD_ROTP    0xA2        // Read OTP
-#define CMD_CCSET   0xE0        // Cascade Setting
-#define CMD_PWS     0xE3        // Power Saving
-#define CMD_TSSET   0xE5        // Force Temperauture
+#define CMD_PSR 0x00   // Panel Setting
+#define CMD_PWR 0x01   // Power Setting
+#define CMD_POF 0x02   // Power OFF
+#define CMD_PFS 0x03   // Power OFF Sequence Setting
+#define CMD_PON 0x04   // Power ON
+#define CMD_PMES 0x05  // Power ON Measure
+#define CMD_BTST 0x06  // Booster Soft Start
+#define CMD_DSLP 0x07  // Deep sleep
+#define CMD_DTM1 0x10  // Display Start Transmission 1
+#define CMD_DSP 0x11   // Data Stop
+#define CMD_DRF 0x12   // Display Refresh
+#define CMD_DTM2 0x13  // Display Start transmission 2
+#define CMD_LUTC 0x20  // VCOM LUT (LUTC)
+#define CMD_LUTWW 0x21 // W2W LUT (LUTWW)
+#define CMD_LUTBW 0x22 // B2W LUT (LUTBW / LUTR)
+#define CMD_LUTWB 0x23 // W2B LUT (LUTWB / LUTW)
+#define CMD_LUTBB 0x24 // B2B LUT (LUTBB / LUTB)
+#define CMD_PLL 0x30   // PLL control
+#define CMD_TSC 0x40   // Temperature Sensor Calibration
+#define CMD_TSE 0x41   // Temperature Sensor Selection
+#define CMD_TSW 0x42   // Temperature Sensor Write
+#define CMD_TSR 0x43   // Temperature Sensor Read
+#define CMD_CDI 0x50   // Vcom and data interval setting
+#define CMD_LPD 0x51   // Lower Power Detection
+#define CMD_TCON 0x60  // TCON setting
+#define CMD_TRES 0x61  // Resolution setting
+#define CMD_GSST 0x65  // GSST Setting
+#define CMD_REV 0x70   // Revision
+#define CMD_FLG 0x71   // Get Status
+#define CMD_AMV 0x80   // Auto Measurement Vcom
+#define CMD_VV 0x81    // Read Vcom Value
+#define CMD_VDCS 0x82  // VCM_DC Setting
+#define CMD_PTL 0x90   // Partial Window
+#define CMD_PTIN 0x91  // Partial In
+#define CMD_PTOUT 0x92 // Partial Out
+#define CMD_PGM 0xA0   // Program Mode
+#define CMD_APG 0xA1   // Active Progrmming
+#define CMD_ROTP 0xA2  // Read OTP
+#define CMD_CCSET 0xE0 // Cascade Setting
+#define CMD_PWS 0xE3   // Power Saving
+#define CMD_TSSET 0xE5 // Force Temperauture
 
 static void UC8176_WaitBusy(uint16_t timeout)
 {
@@ -80,31 +80,29 @@ static void UC8176_WaitBusy(uint16_t timeout)
 
 static void UC8176_PowerOn(void)
 {
-    EPD_WriteCommand(CMD_PON);
+    EPD_WriteCmd(CMD_PON);
     UC8176_WaitBusy(100);
 }
 
 static void UC8176_PowerOff(void)
 {
-    EPD_WriteCommand(CMD_POF);
+    EPD_WriteCmd(CMD_POF);
     UC8176_WaitBusy(100);
 }
 
 // Read temperature from driver chip
 int8_t UC8176_Read_Temp(void)
 {
-    EPD_WriteCommand(CMD_TSC);
+    EPD_WriteCmd(CMD_TSC);
     UC8176_WaitBusy(100);
-    return (int8_t) EPD_ReadByte();
+    return (int8_t)EPD_ReadByte();
 }
 
 // Force temperature (will trigger OTP LUT switch)
 void UC8176_Force_Temp(int8_t value)
 {
-    EPD_WriteCommand(CMD_CCSET);
-    EPD_WriteByte(0x02);
-    EPD_WriteCommand(CMD_TSSET);
-    EPD_WriteByte(value);
+    EPD_Write(CMD_CCSET, 0x02);
+    EPD_Write(CMD_TSSET, value);
 }
 
 void UC8176_Refresh(void)
@@ -112,11 +110,25 @@ void UC8176_Refresh(void)
     NRF_LOG_DEBUG("[EPD]: refresh begin\n");
     UC8176_PowerOn();
     NRF_LOG_DEBUG("[EPD]: temperature: %d\n", UC8176_Read_Temp());
-    EPD_WriteCommand(CMD_DRF);
+    EPD_WriteCmd(CMD_DRF);
     delay(100);
     UC8176_WaitBusy(30000);
     UC8176_PowerOff();
     NRF_LOG_DEBUG("[EPD]: refresh end\n");
+}
+
+static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+{
+    uint16_t xe = (x + w - 1) | 0x0007; // byte boundary inclusive (last byte)
+    uint16_t ye = y + h - 1;
+    x &= 0xFFF8;       // byte boundary
+    xe |= 0x0007;      // byte boundary
+    EPD_Write(CMD_PTL, // partial window
+              x / 256, x % 256,
+              xe / 256, xe % 256,
+              y / 256, y % 256,
+              ye / 256, ye % 256,
+              0x01);
 }
 
 void UC8176_Init()
@@ -125,89 +137,58 @@ void UC8176_Init()
 
     EPD_Reset(HIGH, 10);
 
-    EPD_WriteCommand(CMD_PSR);
-    EPD_WriteByte(EPD->bwr ? 0x0F : 0x1F);
-
-    EPD_WriteCommand(CMD_CDI);
-    EPD_WriteByte(EPD->bwr ? 0x77 : 0x97);
-}
-
-static void UC8176_Write_RAM(uint8_t cmd, uint8_t value)
-{
-    epd_model_t *EPD = epd_get();
-    uint16_t Width = (EPD->width + 7) / 8;
-    uint16_t Height = EPD->height;
-
-    EPD_WriteCommand(cmd);
-    for (uint16_t j = 0; j < Height; j++) {
-        for (uint16_t i = 0; i < Width; i++) {
-            EPD_WriteByte(value);
-        }
-    }
+    EPD_Write(CMD_PSR, EPD->bwr ? 0x0F : 0x1F);
+    EPD_Write(CMD_CDI, EPD->bwr ? 0x77 : 0x97);
 }
 
 void UC8176_Clear(bool refresh)
 {
-    UC8176_Write_RAM(CMD_DTM1, 0xFF);
-    UC8176_Write_RAM(CMD_DTM2, 0xFF);
-    if (refresh) UC8176_Refresh();
-}
+    EPD_FillRAM(CMD_DTM1, 0xFF);
+    EPD_FillRAM(CMD_DTM2, 0xFF);
 
-static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
-{
-    uint16_t xe = (x + w - 1) | 0x0007; // byte boundary inclusive (last byte)
-    uint16_t ye = y + h - 1;
-    x &= 0xFFF8; // byte boundary
-    xe |= 0x0007; // byte boundary
-    EPD_WriteCommand(CMD_PTL); // partial window
-    EPD_WriteByte(x / 256);
-    EPD_WriteByte(x % 256);
-    EPD_WriteByte(xe / 256);
-    EPD_WriteByte(xe % 256);
-    EPD_WriteByte(y / 256);
-    EPD_WriteByte(y % 256);
-    EPD_WriteByte(ye / 256);
-    EPD_WriteByte(ye % 256);
-    EPD_WriteByte(0x01);
+    if (refresh)
+        UC8176_Refresh();
 }
 
 void UC8176_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     epd_model_t *EPD = epd_get();
     uint16_t wb = (w + 7) / 8; // width bytes, bitmaps are padded
-    x -= x % 8; // byte boundary
-    w = wb * 8; // byte boundary
-    if (x + w > EPD->width || y + h > EPD->height) return;
+    x -= x % 8;                // byte boundary
+    w = wb * 8;                // byte boundary
+    if (x + w > EPD->width || y + h > EPD->height)
+        return;
 
-    EPD_WriteCommand(CMD_PTIN); // partial in
+    EPD_WriteCmd(CMD_PTIN); // partial in
     _setPartialRamArea(x, y, w, h);
-    if (EPD->bwr) {
-        EPD_WriteCommand(CMD_DTM1);
-        for (uint16_t i = 0; i < h; i++) {
-            for (uint16_t j = 0; j < w / 8; j++) {
+    if (EPD->bwr)
+    {
+        EPD_WriteCmd(CMD_DTM1);
+        for (uint16_t i = 0; i < h; i++)
+        {
+            for (uint16_t j = 0; j < w / 8; j++)
                 EPD_WriteByte(black ? black[j + i * wb] : 0xFF);
-            }
         }
     }
-    EPD_WriteCommand(CMD_DTM2);
-    for (uint16_t i = 0; i < h; i++) {
-        for (uint16_t j = 0; j < w / 8; j++) {
-            if (EPD->bwr) {
+    EPD_WriteCmd(CMD_DTM2);
+    for (uint16_t i = 0; i < h; i++)
+    {
+        for (uint16_t j = 0; j < w / 8; j++)
+        {
+            if (EPD->bwr)
                 EPD_WriteByte(color ? color[j + i * wb] : 0xFF);
-            } else {
+            else
                 EPD_WriteByte(black[j + i * wb]);
-            }
         }
     }
-    EPD_WriteCommand(CMD_PTOUT); // partial out
+    EPD_WriteCmd(CMD_PTOUT); // partial out
 }
 
 void UC8176_Sleep(void)
 {
     UC8176_PowerOff();
 
-    EPD_WriteCommand(CMD_DSLP);
-    EPD_WriteByte(0xA5);
+    EPD_Write(CMD_DSLP, 0xA5);
 }
 
 // Declare driver and models
