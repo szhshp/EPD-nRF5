@@ -167,6 +167,7 @@ async function sendimg() {
   startTime = new Date().getTime();
   status.parentElement.style.display = "block";
 
+  updateButtonStatus(true);
   if (appVersion < 0x16) {
     if (mode.startsWith('bwr')) {
       await epdWrite(driver === "02" ? 0x24 : 0x10, canvas2bytes(canvas, 'bw'));
@@ -180,6 +181,7 @@ async function sendimg() {
   }
 
   await write(EpdCmd.REFRESH);
+  updateButtonStatus();
 
   const sendTime = (new Date().getTime() - startTime) / 1000.0;
   addLog(`发送完成！耗时: ${sendTime}s`);
@@ -190,9 +192,9 @@ async function sendimg() {
   }, 5000);
 }
 
-function updateButtonStatus() {
+function updateButtonStatus(forceDisabled = false) {
   const connected = gattServer != null && gattServer.connected;
-  const status = connected ? null : 'disabled';
+  const status = forceDisabled ? 'disabled' : (connected ? null : 'disabled');
   document.getElementById("reconnectbutton").disabled = (gattServer == null || gattServer.connected) ? 'disabled' : null;
   document.getElementById("sendcmdbutton").disabled = status;
   document.getElementById("calendarmodebutton").disabled = status;
