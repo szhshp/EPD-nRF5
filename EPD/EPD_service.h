@@ -94,7 +94,6 @@ typedef struct
     bool                     is_notification_enabled; /**< Variable to indicate if the peer has enabled notification of the RX characteristic.*/
     epd_model_t              *epd;                    /**< current EPD model */
     epd_config_t             config;                  /**< EPD config */
-    display_mode_t           display_mode;            /**< GUI display mode */
 } ble_epd_t;
 
 typedef struct

@@ -8,7 +8,7 @@
 #endif
 
 typedef enum {
-    MODE_NONE = 0,
+    MODE_PICTURE = 0,
     MODE_CALENDAR = 1,
     MODE_CLOCK = 2,
 } display_mode_t;

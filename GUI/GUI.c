@@ -119,14 +119,28 @@ static bool GetFestival(uint16_t year, uint8_t mon, uint8_t day, uint8_t week,
     if (GetJieQi(year, mon, day, &JQdate) && JQdate == day) {
         uint8_t JQ = (mon - 1) * 2;
         if (day >= 15) JQ++;
+        strcpy(festival, JieQiStr[JQ]);
         if (JQ == 6) // 清明
-            sprintf(festival, "%s节", JieQiStr[JQ]);
-        else
-            strcpy(festival, JieQiStr[JQ]);
+            strcat(festival, "节");
+            
         return true;
     }
 
     return false;
+}
+
+static void DrawTimeSyncTip(Adafruit_GFX *gfx)
+{
+    GFX_setFont(gfx, u8g2_font_wqy12_t_lunar);
+    GFX_fillRect(gfx, gfx->_width / 2 - 100, gfx->_height / 2 - 25, 200, 50, GFX_WHITE);
+    GFX_drawRoundRect(gfx, gfx->_width / 2 - 100, gfx->_height / 2 - 25, 200, 50, 5, GFX_BLACK);
+    GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
+    GFX_setCursor(gfx, 149, 145);
+    GFX_printf(gfx, "SYNC TIME!");
+    GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
+    GFX_setCursor(gfx, 110, 164);
+    GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
+    GFX_printf(gfx, "https://tsl0922.github.io/EPD-nRF5");
 }
 
 static void DrawBattery(Adafruit_GFX *gfx, int16_t x, int16_t y, float voltage)
@@ -165,7 +179,7 @@ static void DrawDateHeader(Adafruit_GFX *gfx, int16_t x, int16_t y, tm_t *tm, st
     GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
     GFX_printf(gfx, "星期%s", Lunar_DayString[tm->tm_wday]);
 
-    DrawBattery(gfx, 365, 4, data->voltage);
+    DrawBattery(gfx, 365, 6, data->voltage);
 
     GFX_setCursor(gfx, x + 270, y);
     GFX_printf(gfx, "%s%s%s %s%s", Lunar_MonthLeapString[Lunar->IsLeap], Lunar_MonthString[Lunar->Month],
@@ -356,6 +370,10 @@ void DrawGUI(gui_data_t *data, buffer_callback draw, display_mode_t mode)
                 break;
             default:
                 break;
+        }
+        if ((mode == MODE_CALENDAR || mode == MODE_CLOCK) &&
+            (tm.tm_year + YEAR0 == 2025 && tm.tm_mon + 1 == 1)) {
+            DrawTimeSyncTip(&gfx);
         }
     } while(GFX_nextPage(&gfx, draw));
 

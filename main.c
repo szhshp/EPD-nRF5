@@ -417,6 +417,9 @@ void gpiote_evt_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) 
     nrf_drv_gpiote_in_uninit(pin);
     nrf_drv_gpiote_uninit();
 
+    // blink LED on wakeup
+    EPD_LED_BLINK();
+
     advertising_start();
 }
 
@@ -445,10 +448,10 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
         case BLE_ADV_EVT_IDLE:
             NRF_LOG_INFO("advertising timeout\n");
             if (m_epd.config.wakeup_pin != 0xFF) {
-                if (m_epd.display_mode != MODE_NONE)
-                    setup_wakeup_pin(m_epd.config.wakeup_pin);
-                else
+                if (m_epd.config.display_mode == MODE_PICTURE)
                     sleep_mode_enter();
+                else
+                    setup_wakeup_pin(m_epd.config.wakeup_pin);
             } else {
                 advertising_start();
             }
@@ -788,8 +791,10 @@ int main(void)
     NRF_LOG_DEBUG("done.\n");
 
     if (m_resetreas & NRF_POWER_RESETREAS_DOG_MASK) {
-        m_epd.display_mode = MODE_CALENDAR;
+        m_epd.config.display_mode = MODE_CALENDAR;
         ble_epd_on_timer(&m_epd, 0, true);
+    } else {
+        ble_epd_on_timer(&m_epd, m_timestamp, true);
     }
 
     for (;;)
