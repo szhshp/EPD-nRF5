@@ -757,6 +757,7 @@ int main(void)
     // Save reset reason.
     m_resetreas = NRF_POWER->RESETREAS;
     NRF_POWER->RESETREAS |= NRF_POWER->RESETREAS;
+    NRF_LOG_DEBUG("== RESET REASON: %d ===\n", m_resetreas);
 
     NRF_LOG_DEBUG("init..\n");
 

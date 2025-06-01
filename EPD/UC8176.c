@@ -109,6 +109,7 @@ void UC8176_Refresh(void)
 {
     NRF_LOG_DEBUG("[EPD]: refresh begin\n");
     UC8176_PowerOn();
+
     NRF_LOG_DEBUG("[EPD]: temperature: %d\n", UC8176_Read_Temp());
     EPD_WriteCmd(CMD_DRF);
     delay(100);
@@ -131,11 +132,30 @@ static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
               0x01);
 }
 
+void UC8176_Dump_OTP(void)
+{
+    uint8_t data[128];
+
+    UC8176_PowerOn();
+    EPD_Write(CMD_ROTP, 0x00);
+
+    NRF_LOG_DEBUG("=== OTP BEGIN ===\n");
+    for (int i = 0; i < 0xFFF; i += sizeof(data)) {
+        EPD_ReadData(data, sizeof(data));
+        NRF_LOG_HEXDUMP_DEBUG(data, sizeof(data));
+    }
+    NRF_LOG_DEBUG("=== OTP END ===\n");
+
+    UC8176_PowerOff();
+}
+
 void UC8176_Init()
 {
     epd_model_t *EPD = epd_get();
 
     EPD_Reset(HIGH, 10);
+    
+//    UC8176_Dump_OTP();
 
     EPD_Write(CMD_PSR, EPD->bwr ? 0x0F : 0x1F);
     EPD_Write(CMD_CDI, EPD->bwr ? 0x77 : 0x97);

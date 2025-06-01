@@ -94,6 +94,22 @@ static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     EPD_Write(CMD_RAM_YCOUNT, y % 256, y / 256);
 }
 
+void SSD1619_Dump_LUT(void)
+{
+    uint8_t lut[128];
+
+    // Load LUT
+    SSD1619_Update(0xB1);
+    SSD1619_WaitBusy(200);
+
+    EPD_WriteCmd(CMD_READ_LUT);
+    EPD_ReadData(lut, sizeof(lut));
+
+    NRF_LOG_DEBUG("=== LUT BEGIN ===\n");
+    NRF_LOG_HEXDUMP_DEBUG(lut, sizeof(lut));
+    NRF_LOG_DEBUG("=== LUT END ===\n");
+}
+
 void SSD1619_Init()
 {
     epd_model_t *EPD = epd_get();
@@ -105,6 +121,8 @@ void SSD1619_Init()
 
     EPD_Write(CMD_BORDER_CTRL, 0x01);
     EPD_Write(CMD_TSENSOR_CTRL, 0x80);
+
+//    SSD1619_Dump_LUT();
 
     _setPartialRamArea(0, 0, EPD->width, EPD->height);
 }
