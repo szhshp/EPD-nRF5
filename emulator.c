@@ -180,7 +180,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             
             // Use the stored timestamp
             gui_data_t data = {
-                .bwr             = g_bwr_mode,
+                .color           = g_bwr_mode ? 2 : 1,
                 .width           = BITMAP_WIDTH,
                 .height          = BITMAP_HEIGHT,
                 .timestamp       = g_display_time,

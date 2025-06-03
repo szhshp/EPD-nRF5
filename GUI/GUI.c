@@ -350,8 +350,10 @@ void DrawGUI(gui_data_t *data, buffer_callback draw, display_mode_t mode)
 
     Adafruit_GFX gfx;
 
-    if (data->bwr)
+    if (data->color == 2)
       GFX_begin_3c(&gfx, data->width, data->height, PAGE_HEIGHT);
+    else if (data->color == 3)
+      GFX_begin_4c(&gfx, data->width, data->height, PAGE_HEIGHT);
     else
       GFX_begin(&gfx, data->width, data->height, PAGE_HEIGHT);
 

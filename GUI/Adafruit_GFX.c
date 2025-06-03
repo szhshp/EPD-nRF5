@@ -100,8 +100,23 @@ void GFX_begin(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height) {
 /**************************************************************************/
 void GFX_begin_3c(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height) {
   GFX_begin(gfx, w, h, buffer_height);
-  gfx->page_height = buffer_height / 2;
+  gfx->page_height /= 2;
   gfx->color = gfx->buffer + ((gfx->WIDTH + 7) / 8) * gfx->page_height;
+  gfx->total_pages = (gfx->HEIGHT / gfx->page_height) + (gfx->HEIGHT % gfx->page_height > 0);
+}
+
+/**************************************************************************/
+/*!
+   @brief    Instatiate a 4-color GFX context for graphics
+   @param    w   Display width, in pixels
+   @param    h   Display height, in pixels
+   @param    buffer_height Page buffer height, should be multiple of 2
+*/
+/**************************************************************************/
+void GFX_begin_4c(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height) {
+  GFX_begin(gfx, w, h, buffer_height);
+  gfx->page_height /= 2;
+  gfx->color = gfx->buffer;
   gfx->total_pages = (gfx->HEIGHT / gfx->page_height) + (gfx->HEIGHT % gfx->page_height > 0);
 }
 
@@ -148,7 +163,39 @@ void GFX_setRotation(Adafruit_GFX *gfx, GFX_Rotate r) {
   }
 }
 
-
+static uint8_t color4(uint16_t color) {
+  static uint16_t _prev_color = GFX_BLACK;
+  static uint8_t _prev_color4 = 0x00; // black
+  if (color == _prev_color) return _prev_color4;
+  uint8_t cv4 = 0x00;
+  switch (color)
+  {
+    case GFX_BLACK: cv4 = 0x00; break;
+    case GFX_WHITE: cv4 = 0x01; break;
+    case GFX_GREEN: cv4 = 0x02; break; // use yellow?
+    case GFX_BLUE:  cv4 = 0x00; break; // use black
+    case GFX_RED:   cv4 = 0x03; break;
+    case GFX_YELLOW: cv4 = 0x02; break;
+    case GFX_ORANGE: cv4 = 0x02; break; // use yellow?
+    default: {
+        uint16_t red = color & 0xF800;
+        uint16_t green = (color & 0x07E0) << 5;
+        uint16_t blue = (color & 0x001F) << 11;
+        if ((red < 0x8000) && (green < 0x8000) && (blue < 0x8000)) cv4 = 0x00; // black
+        else if ((red >= 0x8000) && (green >= 0x8000) && (blue >= 0x8000)) cv4 = 0x01; // white
+        else if ((red >= 0x8000) && (blue >= 0x8000)) cv4 = 0x03; //  red, blue > red
+        else if ((green >= 0x8000) && (blue >= 0x8000)) cv4 = 0x01; //  green, blue > white
+        else if ((red >= 0x8000) && (green >= 0xC000)) cv4 = 0x02; // yellow
+        else if ((red >= 0x8000) && (green >= 0x4000)) cv4 = 0x03; // orange > red
+        else if (red >= 0x8000) cv4 = 0x03; // red
+        else if (green >= 0x8000) cv4 = 0x00; // green > black
+        else cv4 = 0x03; // blue
+    } break;
+  }
+  _prev_color = color;
+  _prev_color4 = cv4;
+  return cv4;
+}
 /**************************************************************************/
 /*!
    @brief    Draw a pixel
@@ -180,15 +227,25 @@ void GFX_drawPixel(Adafruit_GFX *gfx, int16_t x, int16_t y, uint16_t color) {
   y -= gfx->current_page * gfx->page_height;
   if (y < 0 || y >= gfx->page_height) return;
 
-  uint16_t i = x / 8 + y * (gfx->WIDTH / 8);
-  if (gfx->color != NULL) {
+  if (gfx->color == gfx->buffer) { // 4c
+    uint32_t i = x / 4 + ((uint32_t)y) * (gfx->WIDTH / 4);
+    uint8_t pv = color4(color);
+    switch(x % 4) {
+      case 0: gfx->buffer[i] = (gfx->buffer[i] & 0x3F) | (pv << 6); break;
+      case 1: gfx->buffer[i] = (gfx->buffer[i] & 0xCF) | (pv << 4); break;
+      case 2: gfx->buffer[i] = (gfx->buffer[i] & 0xF3) | (pv << 2); break;
+      case 3: gfx->buffer[i] = (gfx->buffer[i] & 0xFC) | pv; break;
+    }
+  } else if (gfx->color != NULL) { // 3c
+    uint16_t i = x / 8 + y * (gfx->WIDTH / 8);
     gfx->buffer[i] |= 0x80 >> (x & 7); // white
     gfx->color[i] |= 0x80 >> (x & 7);
     if (color == GFX_BLACK)
       gfx->buffer[i] &= ~(0x80 >> (x & 7));
-    else if (color == GFX_RED)
+    else if (color != GFX_WHITE)
       gfx->color[i] &= ~(0x80 >> (x & 7));
   } else {
+    uint16_t i = x / 8 + y * (gfx->WIDTH / 8);
     if (color == GFX_WHITE)
       gfx->buffer[i] |= 0x80 >> (x & 7);
     else
@@ -299,9 +356,14 @@ void GFX_fillRect(Adafruit_GFX *gfx, int16_t x, int16_t y, int16_t w, int16_t h,
 /**************************************************************************/
 void GFX_fillScreen(Adafruit_GFX *gfx, uint16_t color) {
   uint32_t size = ((gfx->WIDTH + 7) / 8) * gfx->page_height;
-  memset(gfx->buffer, color == GFX_WHITE ? 0xFF : 0x00, size);
-  if (gfx->color != NULL)
-    memset(gfx->color, color == GFX_RED ? 0x00 : 0xFF, size);
+  if (gfx->color == gfx->buffer) { // 4c
+    uint8_t pv = color4(color) * 0x55; // 0b01010101
+    memset(gfx->buffer, pv, size * 2);
+  } else {
+    memset(gfx->buffer, color == GFX_WHITE ? 0xFF : 0x00, size);
+    if (gfx->color != NULL)
+      memset(gfx->color, color == GFX_RED ? 0x00 : 0xFF, size);
+  }
 }
 
 /**************************************************************************/

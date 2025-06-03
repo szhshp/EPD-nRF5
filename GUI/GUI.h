@@ -14,7 +14,7 @@ typedef enum {
 } display_mode_t;
 
 typedef struct {
-    bool bwr;
+    uint16_t color;
     uint16_t width;
     uint16_t height;
     uint32_t timestamp;

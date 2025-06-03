@@ -131,7 +131,7 @@ static void SSD1619_Refresh(void)
 {
     epd_model_t *EPD = epd_get();
 
-    EPD_Write(CMD_DISP_CTRL1, EPD->bwr ? 0x80 : 0x40, 0x00);
+    EPD_Write(CMD_DISP_CTRL1, EPD->color == BWR ? 0x80 : 0x40, 0x00);
 
     NRF_LOG_DEBUG("[EPD]: refresh begin\n");
     NRF_LOG_DEBUG("[EPD]: temperature: %d\n", SSD1619_Read_Temp());
@@ -178,7 +178,7 @@ void SSD1619_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y,
     {
         for (uint16_t j = 0; j < w / 8; j++)
         {
-            if (EPD->bwr)
+            if (EPD->color == BWR)
                 EPD_WriteByte(color ? color[j + i * wb] : 0xFF);
             else
                 EPD_WriteByte(black[j + i * wb]);
@@ -207,17 +207,17 @@ static epd_driver_t epd_drv_ssd1619 = {
 // SSD1619 400x300 Black/White/Red
 const epd_model_t epd_ssd1619_420_bwr = {
     .id = EPD_SSD1619_420_BWR,
+    .color = BWR,
     .drv = &epd_drv_ssd1619,
     .width = 400,
     .height = 300,
-    .bwr = true,
 };
 
 // SSD1619 400x300 Black/White
 const epd_model_t epd_ssd1619_420_bw = {
     .id = EPD_SSD1619_420_BW,
+    .color = BW,
     .drv = &epd_drv_ssd1619,
     .width = 400,
     .height = 300,
-    .bwr = false,
 };

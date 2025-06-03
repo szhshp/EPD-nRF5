@@ -8,7 +8,11 @@
 
 #define GFX_BLACK     0x0000
 #define GFX_WHITE     0xFFFF
-#define GFX_RED       0xF800
+#define GFX_RED       0xF800 // 255,   0,   0
+#define GFX_YELLOW    0xFFE0 // 255, 255,   0
+#define GFX_BLUE      0x001F //   0,   0, 255
+#define GFX_GREEN     0x07E0 //   0, 255,   0
+#define GFX_ORANGE    0xFC00 // 255, 128,   0
 
 typedef void (*buffer_callback)(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 
@@ -33,7 +37,7 @@ typedef struct {
   uint8_t utf8_state;   // current state of the utf-8 decoder, contains the remaining bytes for a detected unicode glyph 
 
   uint8_t *buffer;      // black pixel buffer
-  uint8_t *color;       // color pixel buffer
+  uint8_t *color;       // color pixel buffer (3c only)
   int16_t page_height;
   int16_t current_page;
   int16_t total_pages;
@@ -42,6 +46,7 @@ typedef struct {
 // CONTROL API
 void GFX_begin(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height);
 void GFX_begin_3c(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height);
+void GFX_begin_4c(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height);
 void GFX_setRotation(Adafruit_GFX *gfx, GFX_Rotate r);
 void GFX_firstPage(Adafruit_GFX *gfx);
 bool GFX_nextPage(Adafruit_GFX *gfx, buffer_callback callback);

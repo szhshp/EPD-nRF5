@@ -157,8 +157,8 @@ void UC8176_Init()
     
 //    UC8176_Dump_OTP();
 
-    EPD_Write(CMD_PSR, EPD->bwr ? 0x0F : 0x1F);
-    EPD_Write(CMD_CDI, EPD->bwr ? 0x77 : 0x97);
+    EPD_Write(CMD_PSR, EPD->color == BWR ? 0x0F : 0x1F);
+    EPD_Write(CMD_CDI, EPD->color == BWR ? 0x77 : 0x97);
 }
 
 void UC8176_Clear(bool refresh)
@@ -184,7 +184,7 @@ void UC8176_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, 
 
     EPD_WriteCmd(CMD_PTIN); // partial in
     _setPartialRamArea(x, y, w, h);
-    if (EPD->bwr)
+    if (EPD->color == BWR)
     {
         EPD_WriteCmd(CMD_DTM1);
         for (uint16_t i = 0; i < h; i++)
@@ -198,7 +198,7 @@ void UC8176_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, 
     {
         for (uint16_t j = 0; j < w / 8; j++)
         {
-            if (EPD->bwr)
+            if (EPD->color == BWR)
                 EPD_WriteByte(color ? color[j + i * wb] : 0xFF);
             else
                 EPD_WriteByte(black[j + i * wb]);
@@ -230,17 +230,17 @@ static epd_driver_t epd_drv_uc8176 = {
 // UC8176 400x300 Black/White
 const epd_model_t epd_uc8176_420_bw = {
     .id = EPD_UC8176_420_BW,
+    .color = BW,
     .drv = &epd_drv_uc8176,
     .width = 400,
     .height = 300,
-    .bwr = false,
 };
 
 // UC8176 400x300 Black/White/Red
 const epd_model_t epd_uc8176_420_bwr = {
     .id = EPD_UC8176_420_BWR,
+    .color = BWR,
     .drv = &epd_drv_uc8176,
     .width = 400,
     .height = 300,
-    .bwr = true,
 };

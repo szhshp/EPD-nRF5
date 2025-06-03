@@ -47,15 +47,23 @@ typedef enum
     EPD_UC8176_420_BWR = 3,
     EPD_SSD1619_420_BWR = 2,
     EPD_SSD1619_420_BW = 4,
+    EPD_JD79668_420_BWRY = 5,
 } epd_model_id_t;
+
+typedef enum
+{
+    BW = 1,
+    BWR = 2,
+    BWRY = 3,
+} epd_color_t;
 
 typedef struct
 {
     epd_model_id_t id;
+    epd_color_t color;
     epd_driver_t *drv;
     uint16_t width;
     uint16_t height;
-    bool bwr;
 } epd_model_t;
 
 #define LOW             (0x0)

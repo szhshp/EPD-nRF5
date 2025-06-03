@@ -224,7 +224,7 @@ void EPD_FillRAM(uint8_t cmd, uint8_t value, uint32_t len)
 void EPD_Reset(uint32_t value, uint16_t duration)
 {
     digitalWrite(EPD_RST_PIN, value);
-    delay(10);
+    delay(duration);
     digitalWrite(EPD_RST_PIN, (value == LOW) ? HIGH : LOW);
     delay(duration);
     digitalWrite(EPD_RST_PIN, value);
@@ -335,12 +335,14 @@ extern epd_model_t epd_uc8176_420_bw;
 extern epd_model_t epd_uc8176_420_bwr;
 extern epd_model_t epd_ssd1619_420_bwr;
 extern epd_model_t epd_ssd1619_420_bw;
+extern epd_model_t epd_jd79668_420;
 
 static epd_model_t *epd_models[] = {
     &epd_uc8176_420_bw,
     &epd_uc8176_420_bwr,
     &epd_ssd1619_420_bwr,
     &epd_ssd1619_420_bw,
+    &epd_jd79668_420,
 };
 
 epd_model_t *epd_get(void)
