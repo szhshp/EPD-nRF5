@@ -25,6 +25,7 @@
 						<option value="03">UC8176/UC8276（三色屏）</option>
 						<option value="04">SSD1619/SSD1683（黑白屏）</option>
 						<option value="02">SSD1619/SSD1683（三色屏）</option>
+						<option value="05">JD79668（四色屏）</option>
 					</select>	
 				</div>
 				<div class="flex-group debug">
@@ -60,9 +61,13 @@
 							<option value="floydsteinberg">floydsteinberg</option>
 							<option value="Atkinson">Atkinson</option>
 						</optgroup>
-						<optgroup id="dithering-bwr" data-driver="02|03" label="三色">
+						<optgroup data-driver="02|03" label="三色">
 							<option value="bwr_floydsteinberg">黑白红floydsteinberg</option>
 							<option value="bwr_Atkinson">黑白红Atkinson</option>
+						</optgroup>
+						<optgroup data-driver="05" label="四色">
+							<option value="bwry_floydsteinberg">黑白红黄floydsteinberg</option>
+							<option value="bwry_Atkinson">黑白红黄Atkinson</option>
 						</optgroup>
 					</select>
 				</div>
@@ -96,6 +101,7 @@
 						<select id="brush-color" title="画笔颜色">
                             <option value="#000000">黑色</option>
                             <option value="#FF0000">红色</option>
+                            <option value="#FFFF00">黄色</option>
                             <option value="#FFFFFF">白色</option>
                         </select>
 						<input type="number" id="brush-size" value="2" min="1" max="100" title="画笔大小">

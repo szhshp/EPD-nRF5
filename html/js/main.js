@@ -107,7 +107,7 @@ async function epdWriteImage(step = 'bw') {
 
   for (let i = 0; i < data.length; i += chunkSize) {
     let currentTime = (new Date().getTime() - startTime) / 1000.0;
-    setStatus(`${step == 'bw' ? '黑白' : '红色'}块: ${chunkIdx+1}/${count+1}, 总用时: ${currentTime}s`);
+    setStatus(`${step == 'bw' ? '黑白' : '颜色'}块: ${chunkIdx+1}/${count+1}, 总用时: ${currentTime}s`);
     const payload = [
       (step == 'bw' ? 0x0F : 0x00) | ( i == 0 ? 0x00 : 0xF0),
       ...data.slice(i, i + chunkSize),
@@ -169,15 +169,22 @@ async function sendimg() {
 
   updateButtonStatus(true);
   if (appVersion < 0x16) {
-    if (mode.startsWith('bwr')) {
+    if (mode.startsWith('bwry')) {
+      addLog("当前固件版本不支持四色屏幕。");
+      return;
+    } if (mode.startsWith('bwr')) {
       await epdWrite(driver === "02" ? 0x24 : 0x10, canvas2bytes(canvas, 'bw'));
       await epdWrite(driver === "02" ? 0x26 : 0x13, canvas2bytes(canvas, 'red', driver === '02'));
     } else {
       await epdWrite(driver === "04" ? 0x24 : 0x13, canvas2bytes(canvas, 'bw'));
     }
   } else {
-    await epdWriteImage('bw');
-    if (mode.startsWith('bwr')) await epdWriteImage('red');
+    if (mode.startsWith('bwry')) {
+      await epdWriteImage('bwry');
+    } else {
+      await epdWriteImage('bw');
+      if (mode.startsWith('bwr')) await epdWriteImage('red');
+    }
   }
 
   await write(EpdCmd.REFRESH);
@@ -381,7 +388,7 @@ function convertDithering() {
   if (mode === '') return;
 
   if (mode.startsWith('bwr')) {
-    ditheringCanvasByPalette(canvas, bwrPalette, mode);
+    ditheringByPalette(canvas, mode);
   } else {
     const threshold = document.getElementById('threshold').value;
     dithering(ctx, canvas.width, canvas.height, parseInt(threshold), mode);

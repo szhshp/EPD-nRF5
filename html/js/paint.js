@@ -121,6 +121,11 @@ function updateBrushOptions() {
         option.removeAttribute('disabled');
       else
         option.setAttribute('disabled', 'disabled');
+    } else if (option.value === '#FFFF00') {
+      if (dithering.startsWith('bwry'))
+        option.removeAttribute('disabled');
+      else
+        option.setAttribute('disabled', 'disabled');
     }
   }
   // Revert brush color to black if red is not allowed
