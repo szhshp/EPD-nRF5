@@ -378,6 +378,8 @@ function clearCanvas() {
   if (confirm('清除画布已有内容?')) {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    textElements = []; // Clear stored text positions
+    lineSegments = []; // Clear stored line segments
     return true;
   }
   return false;
@@ -393,6 +395,10 @@ function convertDithering() {
     const threshold = document.getElementById('threshold').value;
     dithering(ctx, canvas.width, canvas.height, parseInt(threshold), mode);
   }
+
+  // Redraw text and lines
+  redrawTextElements();
+  redrawLineSegments();
 }
 
 function filterDitheringOptions() {
@@ -442,6 +448,7 @@ document.body.onload = () => {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  initPaintTools();
   updateButtonStatus();
   checkDebugMode();
 }

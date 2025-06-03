@@ -74,26 +74,6 @@ function initPaintTools() {
   
   setupCanvasForPainting();
 
-  // Override the existing clear_canvas function to clear our text positions too
-  const originalClearCanvas = window.clear_canvas;
-  window.clear_canvas = function() {
-    if(originalClearCanvas()) {
-      textElements = []; // Clear stored text positions
-      lineSegments = []; // Clear stored line segments
-      return true;
-    }
-    return false;
-  };
-
-  // Override the existing convert_dithering function to preserve text and lines
-  const originalConvertDithering = window.convert_dithering;
-  window.convert_dithering = function() {
-    originalConvertDithering();
-    // Redraw text and lines after dithering
-    redrawTextElements();
-    redrawLineSegments();
-  };
-
   // Update the brush color options based on dithering method
   document.getElementById('dithering').addEventListener('change', updateBrushOptions);
   
@@ -451,8 +431,3 @@ function redrawLineSegments() {
     ctx.stroke();
   });
 }
-
-// Initialize paint functionality when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(initPaintTools, 500); // Delay to ensure canvas is initialized
-});
