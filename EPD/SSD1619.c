@@ -146,11 +146,12 @@ static void SSD1619_Refresh(void)
 void SSD1619_Clear(bool refresh)
 {
     epd_model_t *EPD = epd_get();
+    uint32_t ram_bytes = ((EPD->width + 7) / 8) * EPD->height;
 
     _setPartialRamArea(0, 0, EPD->width, EPD->height);
 
-    EPD_FillRAM(CMD_WRITE_RAM1, 0xFF);
-    EPD_FillRAM(CMD_WRITE_RAM2, 0xFF);
+    EPD_FillRAM(CMD_WRITE_RAM1, 0xFF, ram_bytes);
+    EPD_FillRAM(CMD_WRITE_RAM2, 0xFF, ram_bytes);
 
     if (refresh)
         SSD1619_Refresh();

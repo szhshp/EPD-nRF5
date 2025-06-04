@@ -94,7 +94,7 @@ uint8_t EPD_ReadByte(void);
         EPD_WriteCmd(cmd); \
         EPD_WriteData(_data, sizeof(_data)); \
     } while (0)
-void EPD_FillRAM(uint8_t cmd, uint8_t value);
+void EPD_FillRAM(uint8_t cmd, uint8_t value, uint32_t len);
 void EPD_Reset(uint32_t value, uint16_t duration);
 void EPD_WaitBusy(uint32_t value, uint16_t timeout);
 

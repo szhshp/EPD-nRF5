@@ -206,14 +206,14 @@ uint8_t EPD_ReadByte(void)
     return value;
 }
 
-void EPD_FillRAM(uint8_t cmd, uint8_t value)
+void EPD_FillRAM(uint8_t cmd, uint8_t value, uint32_t len)
 {
     uint8_t buffer[BUFFER_SIZE];
     for (uint8_t i = 0; i < BUFFER_SIZE; i++)
         buffer[i] = value;
 
     EPD_WriteCmd(cmd);
-    uint16_t remaining = ((EPD->width + 7) / 8) * EPD->height;
+    uint16_t remaining = len;
     while (remaining > 0) {
         uint16_t chunk_size = (remaining > BUFFER_SIZE) ? BUFFER_SIZE : remaining;
         EPD_WriteData(buffer, chunk_size);

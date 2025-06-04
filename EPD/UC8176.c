@@ -163,8 +163,11 @@ void UC8176_Init()
 
 void UC8176_Clear(bool refresh)
 {
-    EPD_FillRAM(CMD_DTM1, 0xFF);
-    EPD_FillRAM(CMD_DTM2, 0xFF);
+    epd_model_t *EPD = epd_get();
+    uint32_t ram_bytes = ((EPD->width + 7) / 8) * EPD->height;
+
+    EPD_FillRAM(CMD_DTM1, 0xFF, ram_bytes);
+    EPD_FillRAM(CMD_DTM2, 0xFF, ram_bytes);
 
     if (refresh)
         UC8176_Refresh();
