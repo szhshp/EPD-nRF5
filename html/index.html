@@ -51,18 +51,18 @@
 			<div class="flex-container">
 				<input type="file" id="image_file" onchange="updateImage(true)" accept=".png,.jpg,.bmp,.webp,.jpeg">
 			</div>
-			<div class="flex-container">
+			<div class="flex-container options">
 				<div class="flex-group debug">
 					<label for="ditherMode">颜色模式：</label>
 					<select id="ditherMode" onchange="updateImage(false)">
-						<option value="blackWhiteColor">黑白</option>
-						<option value="threeColor">三色</option>
-						<option value="fourColor">四色</option>
-						<option value="sixColor">六色</option>
+						<option value="blackWhiteColor">双色(黑白)</option>
+						<option value="threeColor">三色(黑白红)</option>
+						<option value="fourColor">四色(黑白红黄)</option>
+						<option value="sixColor">六色(黑白红黄蓝绿)</option>
 					</select>
 				</div>
 				<div class="flex-group">
-					<label for="ditherType">抖动算法</label>
+					<label for="ditherType">抖动算法：</label>
 					<select id="ditherType" onchange="updateImage(false)">
 						<option value="floydSteinberg">Floyd-Steinberg</option>
 						<option value="atkinson">Atkinson</option>
@@ -72,21 +72,21 @@
 					</select>
 				</div>
 			</div>
-			<div class="flex-container">
+			<div class="flex-container options">
 				<div class="flex-group">
-					<label for="ditherStrength">抖动强度</label>
+					<label for="ditherStrength">抖动强度：</label>
 					<input type="range" min="0" max="5" step="0.1" value="1.0" id="ditherStrength" oninput="updateImage(false)">
 				</div>
 				<div class="flex-group">
-					<label for="contrast">对比度</label>
+					<label for="contrast">对比度：</label>
 					<input type="range" min="0.5" max="2" step="0.1" value="1.2" id="contrast" oninput="updateImage(false)">
 				</div>
 			</div>
-			<div class="flex-container">
+			<div class="flex-container options">
 				<div class="flex-group debug">
-					<label for="mtusize">MTU</label>
+					<label for="mtusize">MTU：</label>
 					<input type="number" id="mtusize" value="20" min="0" max="255">
-					<label for="interleavedcount">确认间隔</label>
+					<label for="interleavedcount">确认间隔：</label>
 					<input type="number" id="interleavedcount" value="50" min="0" max="500">
 				</div>
 			</div>
@@ -106,8 +106,10 @@
 						<button id="brush-mode" title="画笔" class="tool-button">✏️</button>
 						<button id="eraser-mode" title="橡皮擦" class="tool-button">🧽</button>
 						<button id="text-mode" title="添加文字" class="tool-button">T</button>
-						<label for="brush-color">画笔</label>
-						<select id="brush-color" title="画笔颜色">
+					</div>
+					<div class="flex-group">
+						<label for="brush-color">画笔：</label>
+						<select id="brush-color">
                             <option value="#000000">黑色</option>
                             <option value="#FF0000">红色</option>
                             <option value="#FFFF00">黄色</option>
@@ -115,12 +117,13 @@
 							<option value="#0000FF">蓝色</option>
                             <option value="#FFFFFF">白色</option>
                         </select>
-						<input type="number" id="brush-size" value="2" min="1" max="100" title="画笔大小">
+						<label for="brush-size">粗细：</label>
+						<input type="number" id="brush-size" value="2" min="1" max="100">
 					</div>
 				</div>
 				<div class="flex-container canvas-tools">
 					<div class="flex-group text-tools">
-						<label for="font-family">字体</label>
+						<label for="font-family">字体：</label>
 						<select id="font-family">
 								<option value="Arial">Arial</option>
 								<option value="sans-serif">Sans-serif</option>
@@ -152,7 +155,7 @@
 								<option value="WenQuanYi Micro Hei">文泉驿微米黑</option>
 							</optgroup>
 						</select>
-						<label for="font-size">字体大小</label>
+						<label for="font-size">大小：</label>
 						<input type="number" id="font-size" value="16" min="1" max="100">
 					</div>
 					<div class="flex-group text-tools">

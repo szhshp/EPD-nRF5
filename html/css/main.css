@@ -434,6 +434,9 @@ body.debug-mode select:disabled {
     .flex-container {
         flex-direction: column;
     }
+    .flex-container.options .flex-group label {
+        min-width: 80px;
+    }
 
     .canvas-tools.flex-container {
         flex-direction: row;
@@ -444,16 +447,6 @@ body.debug-mode select:disabled {
     .canvas-tools .flex-group {
         justify-content: center;
         width: 100%;
-    }
-
-    .left-controls,
-    .right-controls {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .canvas-log-container {
-        flex-direction: column;
     }
 
     #log {
