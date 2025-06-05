@@ -22,6 +22,26 @@ const EpdCmd = {
   CFG_ERASE:  0x99,
 };
 
+const canvasSizes = [
+  { name: '1.54_152_152', width: 152, height: 152 },
+  { name: '1.54_200_200', width: 200, height: 200 },
+  { name: '2.13_250_122', width: 250, height: 122 },
+  { name: '2.66_296_152', width: 296, height: 152 },
+  { name: '2.9_296_128', width: 296, height: 128 },
+  { name: '2.9_384_168', width: 384, height: 168 },
+  { name: '3.5_384_184', width: 384, height: 184 },
+  { name: '3.7_416_240', width: 416, height: 240 },
+  { name: '3.97_800_480', width: 800, height: 480 },
+  { name: '4.2_400_300', width: 400, height: 300 },
+  { name: '5.79_792_272', width: 792, height: 272 },
+  { name: '7.5_800_480', width: 800, height: 480 },
+  { name: '10.2_960_640', width: 960, height: 640 },
+  { name: '10.85_1360_480', width: 1360, height: 480 },
+  { name: '11.6_960_640', width: 960, height: 640 },
+  { name: '4E_600_400', width: 600, height: 400 },
+  { name: '7.3E6', width: 480, height: 800 }
+];
+
 function hex2bytes(hex) {
   for (var bytes = [], c = 0; c < hex.length; c += 2)
     bytes.push(parseInt(hex.substr(c, 2), 16));
@@ -159,9 +179,15 @@ async function sendcmd() {
 }
 
 async function sendimg() {
+  const canvasSize = document.getElementById('canvasSize').value;
   const ditherMode = document.getElementById('ditherMode').value;
   const epdDriverSelect = document.getElementById('epddriver');
   const selectedOption = epdDriverSelect.options[epdDriverSelect.selectedIndex];
+
+  if (selectedOption.getAttribute('data-size') !== canvasSize) {
+    addLog(`画布尺寸和驱动不匹配，请重新选择。`);
+    return;
+  }
   if (selectedOption.getAttribute('data-color') !== ditherMode) {
     addLog(`颜色模式和驱动不匹配，请重新选择。`);
     return;
@@ -220,27 +246,23 @@ function downloadDataArray() {
   const processedData = processImageData(imageData);
   const mode = document.getElementById('ditherMode').value;
 
-  // 验证六色模式的预期大小
   if (mode === 'sixColor' && processedData.length !== canvas.width * canvas.height) {
     console.log(`错误：预期${canvas.width * canvas.height}字节，但得到${processedData.length}字节`);
     addLog('数组大小不匹配。请检查图像尺寸和模式。');
     return;
   }
 
-  // 使用数组构建内容，避免拼接问题
   const dataLines = [];
   for (let i = 0; i < processedData.length; i++) {
     const hexValue = (processedData[i] & 0xff).toString(16).padStart(2, '0');
     dataLines.push(`0x${hexValue}`);
   }
 
-  // 每行格式化16个值
   const formattedData = [];
   for (let i = 0; i < dataLines.length; i += 16) {
     formattedData.push(dataLines.slice(i, i + 16).join(', '));
   }
 
-  // 构建最终内容
   const colorModeValue = mode === 'sixColor' ? 0 : mode === 'fourColor' ? 1 : mode === 'blackWhiteColor' ? 2 : 3;
   const arrayContent = [
     'const uint8_t imageData[] PROGMEM = {',
@@ -253,7 +275,7 @@ function downloadDataArray() {
 
   const blob = new Blob([arrayContent], { type: 'text/plain' });
   const link = document.createElement('a');
-  link.download = '图像数据.h';
+  link.download = 'imagedata.h';
   link.href = URL.createObjectURL(blob);
   link.click();
   URL.revokeObjectURL(link.href);
@@ -323,7 +345,7 @@ function handleNotify(value, idx) {
     epdpins.value = bytes2hex(data.slice(0, 7));
     if (data.length > 10) epdpins.value += bytes2hex(data.slice(10, 11));
     epddriver.value = bytes2hex(data.slice(7, 8));
-    updateDitherMode();
+    updateDitcherOptions();
   } else {
     if (textDecoder == null) textDecoder = new TextDecoder();
     addLog(textDecoder.decode(data), '⇓');
@@ -411,15 +433,26 @@ function clearLog() {
   document.getElementById("log").innerHTML = '';
 }
 
-function updateDitherMode() {
+function updateCanvasSize() {
+  const selectedSizeName = document.getElementById('canvasSize').value;
+  const selectedSize = canvasSizes.find(size => size.name === selectedSizeName);
+
+  canvas.width = selectedSize.width;
+  canvas.height = selectedSize.height;
+
+  updateImage(false);
+}
+
+function updateDitcherOptions() {
   const epdDriverSelect = document.getElementById('epddriver');
   const selectedOption = epdDriverSelect.options[epdDriverSelect.selectedIndex];
   const colorMode = selectedOption.getAttribute('data-color');
-  
-  if (colorMode) {
-    document.getElementById('ditherMode').value = colorMode;
-    updateImage(false);
-  }
+  const canvasSize = selectedOption.getAttribute('data-size');
+
+  if (colorMode) document.getElementById('ditherMode').value = colorMode;
+  if (canvasSize) document.getElementById('canvasSize').value = canvasSize;
+
+  updateCanvasSize(); // always update image
 }
 
 function updateImage(clear = false) {
