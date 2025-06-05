@@ -74,12 +74,8 @@ function initPaintTools() {
   
   setupCanvasForPainting();
 
-  // Update the brush color options based on dithering method
-  document.getElementById('dithering').addEventListener('change', updateBrushOptions);
-  
   // Ensure no tool is selected by default
   updateToolUI();
-  updateBrushOptions();
 }
 
 function setActiveTool(tool, title) {
@@ -90,28 +86,6 @@ function setActiveTool(tool, title) {
 
   // Cancel any pending text placement
   cancelTextPlacement();
-}
-
-function updateBrushOptions() {
-  const dithering = document.getElementById('dithering').value;
-  const brushColor = document.getElementById('brush-color');
-  for (option of brushColor.getElementsByTagName('option')) {
-    if (option.value === '#FF0000') {
-      if (dithering.startsWith('bwr'))
-        option.removeAttribute('disabled');
-      else
-        option.setAttribute('disabled', 'disabled');
-    } else if (option.value === '#FFFF00') {
-      if (dithering.startsWith('bwry'))
-        option.removeAttribute('disabled');
-      else
-        option.setAttribute('disabled', 'disabled');
-    }
-  }
-  // Revert brush color to black if red is not allowed
-  if (!dithering.startsWith('bwr') && brushColor.value === '#FF0000') {
-    brushColor.value = '#000000';
-  }
 }
 
 function updateToolUI() {

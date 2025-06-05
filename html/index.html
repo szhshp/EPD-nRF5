@@ -20,13 +20,13 @@
                 </div>
 				<div class="flex-group debug">
 					<label for="epddriver">驱动</label>
-					<select id="epddriver" onchange="filterDitheringOptions()">
-						<option value="01">UC8176/UC8276（黑白屏）</option>
-						<option value="03">UC8176/UC8276（三色屏）</option>
-						<option value="04">SSD1619/SSD1683（黑白屏）</option>
-						<option value="02">SSD1619/SSD1683（三色屏）</option>
-						<option value="05">JD79668（四色屏）</option>
-					</select>	
+					<select id="epddriver" onchange="updateDitherMode()">
+						<option value="01" data-color="blackWhiteColor">UC8176/UC8276(黑白)</option>
+						<option value="03" data-color="threeColor">UC8176/UC8276(三色)</option>
+						<option value="04" data-color="blackWhiteColor">SSD1619/SSD1683(黑白)</option>
+						<option value="02" data-color="threeColor">SSD1619/SSD1683(三色)</option>
+						<option value="05" data-color="fourColor">JD79668(四色)</option>
+					</select>
 				</div>
 				<div class="flex-group debug">
 					<label for="epdpins">引脚</label>
@@ -52,29 +52,37 @@
 				<input type="file" id="image_file" onchange="updateImage(true)" accept=".png,.jpg,.bmp,.webp,.jpeg">
 			</div>
 			<div class="flex-container">
-				<div class="flex-group">
-					<label for="dithering">取模算法</label>
-					<select id="dithering" title="取模算法" onchange="onDitheringChange()">
-						<optgroup data-driver="01|04" label="黑白">
-							<option value="none">二值化</option>
-							<option value="bayer">bayer</option>
-							<option value="floydsteinberg">floydsteinberg</option>
-							<option value="Atkinson">Atkinson</option>
-						</optgroup>
-						<optgroup data-driver="02|03" label="三色">
-							<option value="bwr_floydsteinberg">黑白红floydsteinberg</option>
-							<option value="bwr_Atkinson">黑白红Atkinson</option>
-						</optgroup>
-						<optgroup data-driver="05" label="四色">
-							<option value="bwry_floydsteinberg">黑白红黄floydsteinberg</option>
-							<option value="bwry_Atkinson">黑白红黄Atkinson</option>
-						</optgroup>
+				<div class="flex-group debug">
+					<label for="ditherMode">颜色模式：</label>
+					<select id="ditherMode" onchange="updateImage(false)">
+						<option value="blackWhiteColor">黑白</option>
+						<option value="threeColor">三色</option>
+						<option value="fourColor">四色</option>
+						<option value="sixColor">六色</option>
 					</select>
 				</div>
 				<div class="flex-group">
-					<label for="threshold">阈值</label>
-					<input type="number" max="255" min="1" value="125" id="threshold" oninput="updateImage(false)">
+					<label for="ditherType">抖动算法</label>
+					<select id="ditherType" onchange="updateImage(false)">
+						<option value="floydSteinberg">Floyd-Steinberg</option>
+						<option value="atkinson">Atkinson</option>
+						<option value="bayer">Bayer</option>
+						<option value="stucki">Stucki</option>
+						<option value="jarvis">Jarvis-Judice-Ninke</option>
+					</select>
 				</div>
+			</div>
+			<div class="flex-container">
+				<div class="flex-group">
+					<label for="ditherStrength">抖动强度</label>
+					<input type="range" min="0" max="5" step="0.1" value="1.0" id="ditherStrength" oninput="updateImage(false)">
+				</div>
+				<div class="flex-group">
+					<label for="contrast">对比度</label>
+					<input type="range" min="0.5" max="2" step="0.1" value="1.2" id="contrast" oninput="updateImage(false)">
+				</div>
+			</div>
+			<div class="flex-container">
 				<div class="flex-group debug">
 					<label for="mtusize">MTU</label>
 					<input type="number" id="mtusize" value="20" min="0" max="255">
@@ -86,6 +94,7 @@
 			<div class="flex-container">
 				<div class="flex-group">
 					<button id="clearcanvasbutton" type="button" class="secondary" onclick="clearCanvas()">清除画布</button>
+					<button id="downloadArray" type="button" class="secondary debug" onclick="downloadDataArray()">下载数组</button>
 					<button id="sendimgbutton" type="button" class="primary" onclick="sendimg()">发送图片</button>
 				</div>
 			</div>
@@ -102,6 +111,8 @@
                             <option value="#000000">黑色</option>
                             <option value="#FF0000">红色</option>
                             <option value="#FFFF00">黄色</option>
+							<option value="#00FF00">绿色</option>
+							<option value="#0000FF">蓝色</option>
                             <option value="#FFFFFF">白色</option>
                         </select>
 						<input type="number" id="brush-size" value="2" min="1" max="100" title="画笔大小">
