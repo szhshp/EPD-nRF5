@@ -204,6 +204,7 @@ async function sendimg() {
   let dataSent = true;
   updateButtonStatus(true);
   if (appVersion < 0x16) {
+    const driver = epdDriverSelect.value;
     if (ditherMode === 'threeColor') {
       const halfLength = Math.floor(processedData.length / 2);
       await epdWrite(driver === "02" ? 0x24 : 0x10, processedData.slice(0, halfLength));
