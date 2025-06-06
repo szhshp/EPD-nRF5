@@ -100,6 +100,8 @@ void JD79668_Init()
     EPD_Write(0xBD, 0x07);
     EPD_Write(0xBE, 0xFE);
     EPD_Write(0xE9, 0x01);
+
+    JD79668_PowerOn();
 }
 
 // Fast update: 12s
@@ -130,18 +132,15 @@ void JD79668_Init_Fast()
     EPD_Write(0xE6, 0x5A);
     EPD_Write(0xA5, 0x00);
     JD79668_WaitBusy(200);
-    JD79668_PowerOff();
 }
 
 static void JD79668_Refresh(void)
 {
     NRF_LOG_DEBUG("[EPD]: refresh begin\n");
     epd_model_t *EPD = epd_get();
-    JD79668_PowerOn();
     _setPartialRamArea(0, 0, EPD->width, EPD->height);
     EPD_Write(CMD_DRF, 0x00);
     JD79668_WaitBusy(30000);
-    JD79668_PowerOff();
     NRF_LOG_DEBUG("[EPD]: refresh end\n");
 }
 
@@ -175,8 +174,7 @@ void JD79668_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y,
 
 void JD79668_Sleep(void)
 {
-    EPD_Write(CMD_POF, 0x00); // power off
-    JD79668_WaitBusy(200);
+    JD79668_PowerOff();
     delay(100);
     EPD_Write(CMD_DSLP, 0xA5); // deep sleep
 }
