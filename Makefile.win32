@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -O2 -IGUI -DPAGE_HEIGHT=600
+CFLAGS = -Wall -IGUI -DPAGE_HEIGHT=600
 LDFLAGS = -lgdi32 -mwindows
 
 SRCS = GUI/Adafruit_GFX.c GUI/u8g2_font.c GUI/fonts.c GUI/GUI.c GUI/Lunar.c emulator.c

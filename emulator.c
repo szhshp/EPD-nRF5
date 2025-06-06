@@ -19,51 +19,16 @@ BOOL g_bwr_mode = TRUE;  // Default to BWR mode
 time_t g_display_time;
 struct tm g_tm_time;
 
-// Convert bitmap data from e-paper format to Windows DIB format
-static uint8_t *convertBitmap(uint8_t *bitmap, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
-    int bytesPerRow = ((w + 31) / 32) * 4; // Round up to nearest 4 bytes
-    int totalSize = bytesPerRow * h;
-    
-    // Allocate memory for converted bitmap
-    uint8_t *convertedBitmap = (uint8_t*)malloc(totalSize);
-    if (convertedBitmap == NULL) return NULL;
-    
-    memset(convertedBitmap, 0, totalSize);
-
-    int ePaperBytesPerRow = (w + 7) / 8; // E-paper buffer stride
-    
-    for (int row = 0; row < h; row++) {
-        for (int col = 0; col < w; col++) {
-            // Calculate byte and bit position in e-paper buffer
-            int bytePos = row * ePaperBytesPerRow + col / 8;
-            int bitPos = 7 - (col % 8); // MSB first (typical e-paper format)
-            
-            // Check if the bit is set in the e-paper buffer
-            int isSet = (bitmap[bytePos] >> bitPos) & 0x01;
-            
-            // Calculate byte and bit position in Windows DIB
-            int dibBytePos = row * bytesPerRow + col / 8;
-            int dibBitPos = 7 - (col % 8); // MSB first for DIB too
-            
-            // Set the bit in the Windows DIB if it's set in the e-paper buffer
-            if (isSet) {
-                convertedBitmap[dibBytePos] |= (1 << dibBitPos);
-            }
-        }
-    }
-    
-    return convertedBitmap;
-}
+// Add a global variable for the paint HDC
+static HDC g_paintHDC = NULL;
 
 // Implementation of the buffer_callback function
 void DrawBitmap(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
-    HDC hdc;
+    HDC hdc = g_paintHDC;
+    if (!hdc) return;
+    
     RECT clientRect;
     int scale = 1;
-    
-    // Get the device context for immediate drawing
-    hdc = GetDC(g_hwnd);
-    if (!hdc) return;
     
     // Get client area for positioning
     GetClientRect(g_hwnd, &clientRect);
@@ -72,78 +37,94 @@ void DrawBitmap(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t
     int drawX = (clientRect.right - BITMAP_WIDTH * scale) / 2;
     int drawY = (clientRect.bottom - BITMAP_HEIGHT * scale) / 2;
     
-    // Create DIB for visible pixels
+    // Use 4-bit approach (16 colors, but we only use 3)
     BITMAPINFO bmi;
     ZeroMemory(&bmi, sizeof(BITMAPINFO));
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = w;
     bmi.bmiHeader.biHeight = -h; // Negative for top-down bitmap
     bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 1;
+    bmi.bmiHeader.biBitCount = 4; // 4 bits per pixel
     bmi.bmiHeader.biCompression = BI_RGB;
+    bmi.bmiHeader.biClrUsed = 16; // 16 colors (2^4)
     
-    uint8_t *convertedBitmap = convertBitmap(black, x, y, w, h);
-    if (convertedBitmap == NULL) {
-        ReleaseDC(g_hwnd, hdc);
-        return;
+    // Initialize all 16 palette entries to white first
+    for (int i = 0; i < 16; i++) {
+        bmi.bmiColors[i].rgbBlue = 255;
+        bmi.bmiColors[i].rgbGreen = 255;
+        bmi.bmiColors[i].rgbRed = 255;
+        bmi.bmiColors[i].rgbReserved = 0;
     }
     
-    // Set colors for black and white display
-    bmi.bmiColors[0].rgbBlue = 0;
-    bmi.bmiColors[0].rgbGreen = 0;
-    bmi.bmiColors[0].rgbRed = 0;
-    bmi.bmiColors[0].rgbReserved = 0;
+    // Set specific colors for our pixel values
+    // Color 0: White
+    bmi.bmiColors[0].rgbBlue = 255;
+    bmi.bmiColors[0].rgbGreen = 255;
+    bmi.bmiColors[0].rgbRed = 255;
     
-    bmi.bmiColors[1].rgbBlue = 255;
-    bmi.bmiColors[1].rgbGreen = 255;
-    bmi.bmiColors[1].rgbRed = 255;
-    bmi.bmiColors[1].rgbReserved = 0;
+    // Color 1: Black
+    bmi.bmiColors[1].rgbBlue = 0;
+    bmi.bmiColors[1].rgbGreen = 0;
+    bmi.bmiColors[1].rgbRed = 0;
     
-    // Draw the black layer
-    StretchDIBits(hdc,
-                 drawX + x * scale, drawY + y * scale,  // Destination position
-                 w * scale, h * scale,                  // Destination size
-                 0, 0,                                 // Source position
-                 w, h,                                 // Source size
-                 convertedBitmap,                      // Converted bitmap bits
-                 &bmi,                                 // Bitmap info
-                 DIB_RGB_COLORS,                       // Usage
-                 SRCCOPY);                             // Raster operation code
-    free(convertedBitmap);
-
-    // Handle color layer if present (red in BWR displays)
-    if (color) {
-        // Allocate memory for converted color bitmap
-        uint8_t *convertedColor = convertBitmap(color, x, y, w, h);
-        if (convertedColor) {
-            // Set colors for red overlay
-            bmi.bmiColors[0].rgbBlue = 255;
-            bmi.bmiColors[0].rgbGreen = 255;
-            bmi.bmiColors[0].rgbRed = 0;
-            bmi.bmiColors[0].rgbReserved = 0;
+    // Color 2: Red
+    bmi.bmiColors[2].rgbBlue = 0;
+    bmi.bmiColors[2].rgbGreen = 0;
+    bmi.bmiColors[2].rgbRed = 255;
+    
+    // Create 4-bit bitmap data
+    // Each byte contains 2 pixels (4 bits each)
+    int pixelsPerByte = 2;
+    int bytesPerRow = ((w + pixelsPerByte - 1) / pixelsPerByte);
+    // Align to DWORD boundary (4 bytes)
+    bytesPerRow = ((bytesPerRow + 3) / 4) * 4;
+    int totalSize = bytesPerRow * h;
+    
+    uint8_t *bitmap4bit = (uint8_t*)malloc(totalSize);
+    if (!bitmap4bit) {
+        return;
+    }
+    memset(bitmap4bit, 0, totalSize); // Initialize to white (0)
+    
+    int ePaperBytesPerRow = (w + 7) / 8;
+    for (int row = 0; row < h; row++) {
+        for (int col = 0; col < w; col++) {
+            int bytePos = row * ePaperBytesPerRow + col / 8;
+            int bitPos = 7 - (col % 8);
             
-            bmi.bmiColors[1].rgbBlue = 0;
-            bmi.bmiColors[1].rgbGreen = 0;
-            bmi.bmiColors[1].rgbRed = 0;
-            bmi.bmiColors[1].rgbReserved = 0;
+            int blackBit = !((black[bytePos] >> bitPos) & 0x01);
+            int colorBit = color ? !((color[bytePos] >> bitPos) & 0x01) : 0;
             
-            // Draw red overlay
-            StretchDIBits(hdc,
-                         drawX + x * scale, drawY + y * scale,  // Destination position
-                         w * scale, h * scale,                  // Destination size
-                         0, 0,                                 // Source position
-                         w, h,                                 // Source size
-                         convertedColor,                       // Converted bitmap bits
-                         &bmi,                                 // Bitmap info
-                         DIB_RGB_COLORS,                       // Usage
-                         SRCINVERT);                           // Use XOR operation to blend
-                         
-            free(convertedColor);
+            // Determine pixel value: 0=white, 1=black, 2=red
+            uint8_t pixelValue = colorBit ? 2 : (blackBit ? 1 : 0);
+            
+            // Pack into 4-bit format
+            // Each byte stores 2 pixels: [pixel0][pixel1]
+            // High nibble = first pixel, low nibble = second pixel
+            int bitmap4bitBytePos = row * bytesPerRow + col / pixelsPerByte;
+            int isHighNibble = (col % pixelsPerByte) == 0;
+            
+            if (isHighNibble) {
+                // Clear high nibble and set new value
+                bitmap4bit[bitmap4bitBytePos] &= 0x0F;
+                bitmap4bit[bitmap4bitBytePos] |= (pixelValue << 4);
+            } else {
+                // Clear low nibble and set new value
+                bitmap4bit[bitmap4bitBytePos] &= 0xF0;
+                bitmap4bit[bitmap4bitBytePos] |= pixelValue;
+            }
         }
     }
     
-    // Release the device context
-    ReleaseDC(g_hwnd, hdc);
+    // Draw the bitmap
+    StretchDIBits(hdc,
+                 drawX + x * scale, drawY + y * scale,
+                 w * scale, h * scale,
+                 0, 0, w, h,
+                 bitmap4bit, &bmi,
+                 DIB_RGB_COLORS, SRCCOPY);
+    
+    free(bitmap4bit);
 }
 
 // Window procedure
@@ -169,6 +150,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
             
+            // Set the global HDC for DrawBitmap to use
+            g_paintHDC = hdc;
+            
             // Get client rect for calculations
             RECT clientRect;
             GetClientRect(hwnd, &clientRect);
@@ -188,8 +172,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 .voltage         = 3.2f,
             };
             
-            // Call DrawGUI to render the interface, passing the BWR mode
+            // Call DrawGUI to render the interface
             DrawGUI(&data, DrawBitmap, g_display_mode);
+            
+            // Clear the global HDC
+            g_paintHDC = NULL;
             
             EndPaint(hwnd, &ps);
             return 0;
