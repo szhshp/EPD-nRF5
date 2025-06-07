@@ -94,31 +94,7 @@ async function write(cmd, data, withResponse = true) {
   return true;
 }
 
-async function epdWrite(cmd, data) {
-  const chunkSize = document.getElementById('mtusize').value - 1;
-  const interleavedCount = document.getElementById('interleavedcount').value;
-  const count = Math.round(data.length / chunkSize);
-  let chunkIdx = 0;
-  let noReplyCount = interleavedCount;
-
-  if (typeof data == 'string') data = hex2bytes(data);
-
-  await write(EpdCmd.SEND_CMD, [cmd]);
-  for (let i = 0; i < data.length; i += chunkSize) {
-    let currentTime = (new Date().getTime() - startTime) / 1000.0;
-    setStatus(`命令：0x${cmd.toString(16)}, 数据块: ${chunkIdx + 1}/${count + 1}, 总用时: ${currentTime}s`);
-    if (noReplyCount > 0) {
-      await write(EpdCmd.SEND_DATA, data.slice(i, i + chunkSize), false);
-      noReplyCount--;
-    } else {
-      await write(EpdCmd.SEND_DATA, data.slice(i, i + chunkSize), true);
-      noReplyCount = interleavedCount;
-    }
-    chunkIdx++;
-  }
-}
-
-async function epdWriteImage(data, step = 'bw') {
+async function writeImage(data, step = 'bw') {
   const chunkSize = document.getElementById('mtusize').value - 2;
   const interleavedCount = document.getElementById('interleavedcount').value;
   const count = Math.round(data.length / chunkSize);
@@ -201,38 +177,24 @@ async function sendimg() {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const processedData = processImageData(imageData);
 
-  let dataSent = true;
   updateButtonStatus(true);
-  if (appVersion < 0x16) {
-    const driver = epdDriverSelect.value;
-    if (ditherMode === 'threeColor') {
-      const halfLength = Math.floor(processedData.length / 2);
-      await epdWrite(driver === "02" ? 0x24 : 0x10, processedData.slice(0, halfLength));
-      await epdWrite(driver === "02" ? 0x26 : 0x13, processedData.slice(halfLength));
-    } else if (ditherMode === 'blackWhiteColor') {
-      await epdWrite(driver === "04" ? 0x24 : 0x13, processedData);
-    } else {
-      addLog("当前固件不支持此颜色模式。");
-      dataSent = false;
-    }
+
+  if (ditherMode === 'fourColor') {
+    await writeImage(processedData, 'color');
+  } else if (ditherMode === 'threeColor') {
+    const halfLength = Math.floor(processedData.length / 2);
+    await writeImage(processedData.slice(0, halfLength), 'bw');
+    await writeImage(processedData.slice(halfLength), 'red');
+  } else if (ditherMode === 'blackWhiteColor') {
+    await writeImage(processedData, 'bw');
   } else {
-    if (ditherMode === 'fourColor') {
-      await epdWriteImage(processedData, 'color');
-    } else if (ditherMode === 'threeColor') {
-      const halfLength = Math.floor(processedData.length / 2);
-      await epdWriteImage(processedData.slice(0, halfLength), 'bw');
-      await epdWriteImage(processedData.slice(halfLength), 'red');
-    } else if (ditherMode === 'blackWhiteColor') {
-      await epdWriteImage(processedData, 'bw');
-    } else {
-      addLog("当前固件不支持此颜色模式。");
-      dataSent = false;
-    }
+    addLog("当前固件不支持此颜色模式。");
+    updateButtonStatus();
+    return;
   }
-  updateButtonStatus();
-  if (!dataSent) return;
 
   await write(EpdCmd.REFRESH);
+  updateButtonStatus();
 
   const sendTime = (new Date().getTime() - startTime) / 1000.0;
   addLog(`发送完成！耗时: ${sendTime}s`);
@@ -380,6 +342,15 @@ async function connect() {
   } catch (e) {
     console.error(e);
     appVersion = 0x15;
+  }
+
+  if (appVersion < 0x16) {
+    const oldURL = "https://tsl0922.github.io/EPD-nRF5/v1.5";
+    alert("!!!注意!!!\n当前固件版本过低，可能无法正常使用部分功能，建议升级到最新版本。");
+    if (confirm('是否访问旧版本上位机？')) location.href = oldURL;
+    setTimeout(() => {
+      addLog(`如遇到问题，可访问旧版本上位机: ${oldURL}`);
+    }, 500);
   }
 
   try {
