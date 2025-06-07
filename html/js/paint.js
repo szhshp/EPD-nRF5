@@ -93,7 +93,12 @@ function updateToolUI() {
   document.getElementById('brush-mode').classList.toggle('active', currentTool === 'brush');
   document.getElementById('eraser-mode').classList.toggle('active', currentTool === 'eraser');
   document.getElementById('text-mode').classList.toggle('active', currentTool === 'text');
-  
+
+  // Show/hide brush tools
+  document.querySelectorAll('.brush-tools').forEach(el => {
+    el.style.display = ['brush', 'text'].includes(currentTool) ? 'flex' : 'none';
+  });
+
   // Show/hide text tools
   document.querySelectorAll('.text-tools').forEach(el => {
     el.style.display = currentTool === 'text' ? 'flex' : 'none';
