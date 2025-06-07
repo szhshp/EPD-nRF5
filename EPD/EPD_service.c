@@ -161,11 +161,7 @@ static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t l
 
       case EPD_CMD_WRITE_IMAGE: // MSB=0000: ram begin, LSB=1111: black
           if (length < 3) return;
-          if ((p_data[1] >> 4) == 0x00) {
-              bool black = (p_data[1] & 0x0F) == 0x0F;
-              EPD_WriteCmd(black ? p_epd->epd->drv->cmd_write_ram1 : p_epd->epd->drv->cmd_write_ram2);
-          }
-          EPD_WriteData(&p_data[2], length - 2);
+          p_epd->epd->drv->write_ram((p_data[1] >> 4) == 0x00, (p_data[1] & 0x0F) == 0x0F, &p_data[2], length - 2);
           break;
 
       case EPD_CMD_SET_CONFIG:

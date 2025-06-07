@@ -172,6 +172,13 @@ void JD79668_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y,
     }
 }
 
+void JD79668_Wite_Ram(bool begin, bool black, uint8_t *data, uint8_t len)
+{
+    if (begin)
+        EPD_WriteCmd(CMD_DTM);
+    EPD_WriteData(data, len);
+}
+
 void JD79668_Sleep(void)
 {
     JD79668_PowerOff();
@@ -183,12 +190,11 @@ static epd_driver_t epd_drv_JD79668 = {
     .init = JD79668_Init,
     .clear = JD79668_Clear,
     .write_image = JD79668_Write_Image,
+    .write_ram = JD79668_Wite_Ram,
     .refresh = JD79668_Refresh,
     .sleep = JD79668_Sleep,
     .read_temp = JD79668_Read_Temp,
     .force_temp = JD79668_Force_Temp,
-    .cmd_write_ram1 = CMD_DTM,
-    .cmd_write_ram2 = CMD_DTM,
 };
 
 // JD79668 400x300 Black/White/Red/Yellow

@@ -186,6 +186,18 @@ void SSD1619_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y,
     }
 }
 
+void SSD1619_Wite_Ram(bool begin, bool black, uint8_t *data, uint8_t len)
+{
+    if (begin) {
+        epd_model_t *EPD = epd_get();
+        if (EPD->color == BWR)
+            EPD_WriteCmd(black ? CMD_WRITE_RAM1 : CMD_WRITE_RAM2);
+        else
+            EPD_WriteCmd(CMD_WRITE_RAM1);
+    }
+    EPD_WriteData(data, len);
+}
+
 void SSD1619_Sleep(void)
 {
     EPD_Write(CMD_SLEEP_MODE, 0x01);
@@ -196,12 +208,11 @@ static epd_driver_t epd_drv_ssd1619 = {
     .init = SSD1619_Init,
     .clear = SSD1619_Clear,
     .write_image = SSD1619_Write_Image,
+    .write_ram = SSD1619_Wite_Ram,
     .refresh = SSD1619_Refresh,
     .sleep = SSD1619_Sleep,
     .read_temp = SSD1619_Read_Temp,
     .force_temp = SSD1619_Force_Temp,
-    .cmd_write_ram1 = CMD_WRITE_RAM1,
-    .cmd_write_ram2 = CMD_WRITE_RAM2,
 };
 
 // SSD1619 400x300 Black/White/Red

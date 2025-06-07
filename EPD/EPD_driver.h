@@ -33,12 +33,11 @@ typedef struct
     void (*init)();                                   /**< Initialize the e-Paper register */
     void (*clear)(bool refresh);                      /**< Clear screen */
     void (*write_image)(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h); /**< write image */
+    void (*write_ram)(bool begin, bool black, uint8_t *data, uint8_t len); /* write data to epd ram */
     void (*refresh)(void);                            /**< Sends the image buffer in RAM to e-Paper and displays */
     void (*sleep)(void);                              /**< Enter sleep mode */
     int8_t (*read_temp)(void);                        /**< Read temperature from driver chip */
     void (*force_temp)(int8_t value);                 /**< Force temperature (will trigger OTP LUT switch) */
-    uint8_t cmd_write_ram1;                           /**< Command to write black ram */
-    uint8_t cmd_write_ram2;                           /**< Command to write red ram */
 } epd_driver_t;
 
 typedef enum

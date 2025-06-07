@@ -207,6 +207,18 @@ void UC8176_Write_Image(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, 
     EPD_WriteCmd(CMD_PTOUT); // partial out
 }
 
+void UC8176_Wite_Ram(bool begin, bool black, uint8_t *data, uint8_t len)
+{
+    if (begin) {
+        epd_model_t *EPD = epd_get();
+        if (EPD->color == BWR)
+            EPD_WriteCmd(black ? CMD_DTM1 : CMD_DTM2);
+        else
+            EPD_WriteCmd(CMD_DTM2);
+    }
+    EPD_WriteData(data, len);
+}
+
 void UC8176_Sleep(void)
 {
     UC8176_PowerOff();
@@ -219,12 +231,11 @@ static epd_driver_t epd_drv_uc8176 = {
     .init = UC8176_Init,
     .clear = UC8176_Clear,
     .write_image = UC8176_Write_Image,
+    .write_ram = UC8176_Wite_Ram,
     .refresh = UC8176_Refresh,
     .sleep = UC8176_Sleep,
     .read_temp = UC8176_Read_Temp,
     .force_temp = UC8176_Force_Temp,
-    .cmd_write_ram1 = CMD_DTM1,
-    .cmd_write_ram2 = CMD_DTM2,
 };
 
 // UC8176 400x300 Black/White
