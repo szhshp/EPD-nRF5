@@ -7,8 +7,8 @@
 
 #define BITMAP_WIDTH   400
 #define BITMAP_HEIGHT  300
-#define WINDOW_WIDTH   420
-#define WINDOW_HEIGHT  340
+#define WINDOW_WIDTH   450
+#define WINDOW_HEIGHT  380
 #define WINDOW_TITLE   TEXT("Emurator")
 
 // Global variables
@@ -161,6 +161,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             HBRUSH bgBrush = CreateSolidBrush(RGB(240, 240, 240));
             FillRect(hdc, &clientRect, bgBrush);
             DeleteObject(bgBrush);
+            
+            // Calculate border position (same as bitmap position)
+            int scale = 1;
+            int drawX = (clientRect.right - BITMAP_WIDTH * scale) / 2;
+            int drawY = (clientRect.bottom - BITMAP_HEIGHT * scale) / 2;
+            
+            // Draw border around the bitmap area
+            HPEN borderPen = CreatePen(PS_DOT, 1, RGB(0, 0, 255));
+            HPEN oldPen = SelectObject(hdc, borderPen);
+            HBRUSH oldBrush = SelectObject(hdc, GetStockObject(NULL_BRUSH)); // No fill
+            
+            Rectangle(hdc, drawX - 1, drawY - 1, 
+                     drawX + BITMAP_WIDTH * scale + 1, 
+                     drawY + BITMAP_HEIGHT * scale + 1);
+            
+            SelectObject(hdc, oldPen);
+            SelectObject(hdc, oldBrush);
+            DeleteObject(borderPen);
             
             // Use the stored timestamp
             gui_data_t data = {
