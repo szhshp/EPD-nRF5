@@ -25,22 +25,23 @@ typedef enum {
 
 // GRAPHICS CONTEXT
 typedef struct {
-  int16_t WIDTH;        ///< This is the 'raw' display width - never changes
-  int16_t HEIGHT;       ///< This is the 'raw' display height - never changes
-  int16_t _width;       ///< Display width as modified by current rotation
-  int16_t _height;      ///< Display height as modified by current rotation
-  GFX_Rotate rotation;  ///< Display rotation (0 thru 3)
+  int16_t WIDTH;             // This is the 'raw' display width - never changes
+  int16_t HEIGHT;            // This is the 'raw' display height - never changes
+  int16_t _width;            // Display width as modified by current rotation
+  int16_t _height;           // Display height as modified by current rotation
+  GFX_Rotate rotation;       // Display rotation (0 thru 3)
 
   u8g2_font_t u8g2;
-  int16_t tx, ty;       // current position for the print command
-  uint16_t encoding;    // the unicode, detected by the utf-8 decoder
-  uint8_t utf8_state;   // current state of the utf-8 decoder, contains the remaining bytes for a detected unicode glyph 
+  int16_t tx, ty;            // current position for the print command
+  uint16_t encoding;         // the unicode, detected by the utf-8 decoder
+  uint8_t utf8_state;        // current state of the utf-8 decoder, contains the remaining bytes for a detected unicode glyph 
 
-  uint8_t *buffer;      // black pixel buffer
-  uint8_t *color;       // color pixel buffer (3c only)
-  int16_t page_height;
-  int16_t current_page;
-  int16_t total_pages;
+  uint8_t *buffer;           // black pixel buffer
+  uint8_t *color;            // color pixel buffer (3c only)
+  uint16_t px, py, pw, ph;   // partial window offset and size
+  int16_t page_height;       // height to be drawn in one page
+  int16_t current_page;      // index of the current drawing page
+  int16_t total_pages;       // total number of pages to be drawn
 } Adafruit_GFX;
 
 // CONTROL API
@@ -48,6 +49,7 @@ void GFX_begin(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height);
 void GFX_begin_3c(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height);
 void GFX_begin_4c(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height);
 void GFX_setRotation(Adafruit_GFX *gfx, GFX_Rotate r);
+void GFX_setWindow(Adafruit_GFX *gfx, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 void GFX_firstPage(Adafruit_GFX *gfx);
 bool GFX_nextPage(Adafruit_GFX *gfx, buffer_callback callback);
 void GFX_end(Adafruit_GFX *gfx);

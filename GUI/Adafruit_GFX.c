@@ -88,6 +88,7 @@ void GFX_begin(Adafruit_GFX *gfx, int16_t w, int16_t h, int16_t buffer_height) {
   gfx->buffer = malloc(((gfx->WIDTH + 7) / 8) * buffer_height);
   gfx->page_height = buffer_height;
   gfx->total_pages = (gfx->HEIGHT / gfx->page_height) + (gfx->HEIGHT % gfx->page_height > 0);
+  GFX_setWindow(gfx, 0, 0, gfx->WIDTH, gfx->HEIGHT);
 }
 
 /**************************************************************************/
@@ -130,10 +131,19 @@ void GFX_firstPage(Adafruit_GFX *gfx) {
 }
 
 bool GFX_nextPage(Adafruit_GFX *gfx, buffer_callback callback) {
-  int16_t page_y = gfx->current_page * gfx->page_height;
-  int16_t height = MIN(gfx->page_height, gfx->HEIGHT - page_y);
-  if (callback)
-    callback(gfx->buffer, gfx->color, 0, page_y, gfx->WIDTH, height);
+  if (callback) {
+    int16_t page_ys = gfx->current_page * gfx->page_height;
+    if (gfx->px != 0 || gfx->py != 0 || gfx->pw != gfx->_width || gfx->ph != gfx->_height) {
+      int16_t page_ye = gfx->current_page < gfx->total_pages - 1 ? page_ys + gfx->page_height : gfx->HEIGHT;
+      uint16_t dest_ys = gfx->py + page_ys; // transposed
+      uint16_t dest_ye = MIN(gfx->py + gfx->ph, gfx->py + page_ye);
+      if (dest_ye > dest_ys)
+        callback(gfx->buffer, gfx->color, gfx->px, dest_ys, gfx->pw, dest_ye - dest_ys);
+    } else {
+      int16_t height = MIN(gfx->page_height, gfx->HEIGHT - page_ys);
+      callback(gfx->buffer, gfx->color, 0, page_ys, gfx->WIDTH, height);
+    }
+  }
 
   gfx->current_page++;
   GFX_fillScreen(gfx, GFX_WHITE);
@@ -161,6 +171,46 @@ void GFX_setRotation(Adafruit_GFX *gfx, GFX_Rotate r) {
     gfx->_height = gfx->WIDTH;
     break;
   }
+}
+
+/**************************************************************************/
+/*!
+    setWindow, use parameters according to actual rotation.
+    x and w should be multiple of 8, for rotation 0 or 2,
+    y and h should be multiple of 8, for rotation 1 or 3,
+    else window is increased as needed,
+    this is an addressing limitation of the e-paper controllers
+*/
+/**************************************************************************/
+void GFX_setWindow(Adafruit_GFX *gfx, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+{
+  gfx->px = MIN(x, gfx->_width);
+  gfx->py = MIN(y, gfx->_height);
+  gfx->pw = MIN(w, gfx->_width - gfx->px);
+  gfx->ph = MIN(h, gfx->_height - gfx->py);
+  
+  switch(gfx->rotation) {
+    case GFX_ROTATE_0:
+      break;
+    case GFX_ROTATE_90:
+      SWAP(gfx->px, gfx->py, uint16_t);
+      SWAP(gfx->pw, gfx->ph, uint16_t);
+      gfx->px = gfx->WIDTH - gfx->px - gfx->pw;
+      break;
+    case GFX_ROTATE_180:
+      gfx->px = gfx->WIDTH - gfx->px - gfx->pw;
+      gfx->py = gfx->HEIGHT - gfx->py - gfx->ph;
+      break;
+    case GFX_ROTATE_270:
+      SWAP(gfx->px, gfx->py, uint16_t);
+      SWAP(gfx->pw, gfx->ph, uint16_t);
+      gfx->py = gfx->HEIGHT - gfx->py - gfx->ph;
+      break;
+  }
+
+  gfx->pw += gfx->px % 8;
+  if (gfx->pw % 8 > 0) gfx->pw += 8 - (gfx->pw % 8);
+  gfx->px -= gfx->px % 8;
 }
 
 static uint8_t color4(uint16_t color) {
@@ -224,11 +274,18 @@ void GFX_drawPixel(Adafruit_GFX *gfx, int16_t x, int16_t y, uint16_t color) {
       break;
   }
 
+  // transpose partial window to 0,0
+  x -= gfx->px;
+  y -= gfx->py;
+  // clip to (partial) window
+  if (x < 0 || x >= gfx->pw || y < 0 || y >= gfx->ph) return;
+  // adjust for current page
   y -= gfx->current_page * gfx->page_height;
+  // check if in current page
   if (y < 0 || y >= gfx->page_height) return;
 
   if (gfx->color == gfx->buffer) { // 4c
-    uint32_t i = x / 4 + ((uint32_t)y) * (gfx->WIDTH / 4);
+    uint32_t i = x / 4 + ((uint32_t)y) * (gfx->pw / 4);
     uint8_t pv = color4(color);
     switch(x % 4) {
       case 0: gfx->buffer[i] = (gfx->buffer[i] & 0x3F) | (pv << 6); break;
@@ -237,7 +294,7 @@ void GFX_drawPixel(Adafruit_GFX *gfx, int16_t x, int16_t y, uint16_t color) {
       case 3: gfx->buffer[i] = (gfx->buffer[i] & 0xFC) | pv; break;
     }
   } else if (gfx->color != NULL) { // 3c
-    uint16_t i = x / 8 + y * (gfx->WIDTH / 8);
+    uint16_t i = x / 8 + y * (gfx->pw / 8);
     gfx->buffer[i] |= 0x80 >> (x & 7); // white
     gfx->color[i] |= 0x80 >> (x & 7);
     if (color == GFX_BLACK)
@@ -245,7 +302,7 @@ void GFX_drawPixel(Adafruit_GFX *gfx, int16_t x, int16_t y, uint16_t color) {
     else if (color != GFX_WHITE)
       gfx->color[i] &= ~(0x80 >> (x & 7));
   } else {
-    uint16_t i = x / 8 + y * (gfx->WIDTH / 8);
+    uint16_t i = x / 8 + y * (gfx->pw / 8);
     if (color == GFX_WHITE)
       gfx->buffer[i] |= 0x80 >> (x & 7);
     else
