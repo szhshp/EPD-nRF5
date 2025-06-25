@@ -312,7 +312,13 @@ function handleNotify(value, idx) {
     updateDitcherOptions();
   } else {
     if (textDecoder == null) textDecoder = new TextDecoder();
-    addLog(textDecoder.decode(data), '⇓');
+    const msg = textDecoder.decode(data);
+    addLog(msg, '⇓');
+    if (msg.startsWith('t=') && msg.length > 2) {
+      const t = parseInt(msg.substring(2)) + new Date().getTimezoneOffset() * 60;
+      addLog(`远端时间: ${new Date(t * 1000).toLocaleString()}`);
+      addLog(`本地时间: ${new Date().toLocaleString()}`);
+    }
   }
 }
 
