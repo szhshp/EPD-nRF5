@@ -13,7 +13,7 @@
 #ifndef __EPD_SERVICE_H
 #define __EPD_SERVICE_H
 
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include "ble.h"
 #include "ble_srv_common.h"
