@@ -94,6 +94,13 @@ static void epd_send_time(ble_epd_t * p_epd)
     ble_epd_string_send(p_epd, (uint8_t *)buf, strlen(buf));
 }
 
+static void epd_send_mtu(ble_epd_t * p_epd)
+{
+    char buf[10] = {0};
+    snprintf(buf, sizeof(buf), "mtu=%d", p_epd->max_data_len);
+    ble_epd_string_send(p_epd, (uint8_t *)buf, strlen(buf));
+}
+
 static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t length)
 {
     NRF_LOG_DEBUG("[EPD]: on_write LEN=%d\n", length);
@@ -128,6 +135,7 @@ static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t l
               epd_config_write(&p_epd->config);
           }
           p_epd->epd = epd_init((epd_model_id_t)id);
+          epd_send_mtu(p_epd);
           epd_send_time(p_epd);
         } break;
 

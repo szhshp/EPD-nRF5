@@ -314,7 +314,11 @@ function handleNotify(value, idx) {
     if (textDecoder == null) textDecoder = new TextDecoder();
     const msg = textDecoder.decode(data);
     addLog(msg, '⇓');
-    if (msg.startsWith('t=') && msg.length > 2) {
+    if (msg.startsWith('mtu=') && msg.length > 4) {
+      const mtuSize = parseInt(msg.substring(4));
+      document.getElementById('mtusize').value = mtuSize;
+      addLog(`MTU 已更新为: ${mtuSize}`);
+    } else if (msg.startsWith('t=') && msg.length > 2) {
       const t = parseInt(msg.substring(2)) + new Date().getTimezoneOffset() * 60;
       addLog(`远端时间: ${new Date(t * 1000).toLocaleString()}`);
       addLog(`本地时间: ${new Date().toLocaleString()}`);
