@@ -179,9 +179,9 @@ static void DrawDateHeader(Adafruit_GFX *gfx, int16_t x, int16_t y, tm_t *tm, st
     GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
     GFX_printf(gfx, "星期%s", Lunar_DayString[tm->tm_wday]);
 
-    DrawBattery(gfx, 365, 6, data->voltage);
+    DrawBattery(gfx, 366, 6, data->voltage);
 
-    GFX_setCursor(gfx, x + 270, y);
+    GFX_setCursor(gfx, x + (Lunar->IsLeap ? 266 : 272), y);
     GFX_printf(gfx, "%s%s%s %s%s", Lunar_MonthLeapString[Lunar->IsLeap], Lunar_MonthString[Lunar->Month],
                      Lunar_DateString[Lunar->Date], Lunar_StemStrig[LUNAR_GetStem(Lunar)],
                      Lunar_BranchStrig[LUNAR_GetBranch(Lunar)]);
