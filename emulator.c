@@ -188,6 +188,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 .timestamp       = g_display_time,
                 .temperature     = 25,
                 .voltage         = 3.2f,
+                .ssid            = "NRF_EPD_84AC",
             };
             
             // Call DrawGUI to render the interface

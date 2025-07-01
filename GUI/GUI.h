@@ -20,6 +20,7 @@ typedef struct {
     uint32_t timestamp;
     int8_t temperature;
     float voltage;
+    char ssid[13];
 } gui_data_t;
 
 void DrawGUI(gui_data_t *data, buffer_callback draw, display_mode_t mode);

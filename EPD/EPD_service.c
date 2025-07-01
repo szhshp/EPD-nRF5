@@ -47,6 +47,13 @@ static void epd_gui_update(void * p_event_data, uint16_t event_size)
         .temperature     = epd->drv->read_temp(),
         .voltage         = EPD_ReadVoltage(),
     };
+
+    char dev_name[20];
+    uint16_t dev_name_len = sizeof(dev_name);
+    uint32_t err_code = sd_ble_gap_device_name_get((uint8_t *)dev_name, &dev_name_len);
+    if (err_code == NRF_SUCCESS && dev_name_len > 0)
+        memcpy(data.ssid, dev_name, sizeof(data.ssid) - 1);
+
     DrawGUI(&data, epd->drv->write_image, (display_mode_t)p_epd->config.display_mode);
     epd->drv->refresh();
     EPD_GPIO_Uninit();
