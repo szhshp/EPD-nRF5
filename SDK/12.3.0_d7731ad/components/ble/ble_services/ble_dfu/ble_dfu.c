@@ -39,12 +39,13 @@
  */
 
 /* Attention!
-*  To maintain compliance with Nordic Semiconductor ASA’s Bluetooth profile
+*  To maintain compliance with Nordic Semiconductor ASAï¿½s Bluetooth profile
 *  qualification listings, this section of source code must not be modified.
 */
 
 #include "ble_dfu.h"
 #include "nrf_log.h"
+#include "nrf_delay.h"
 #include <string.h>
 #include "ble_hci.h"
 #include "sdk_macros.h"
@@ -53,8 +54,11 @@
 
 #define MAX_CTRL_POINT_RESP_PARAM_LEN 3
 
+#define BLE_DFU_SERVICE_UUID            0xFE59                      //!< The 16-bit UUID of the Secure DFU Service.
+
 ble_dfu_t * p_m_dfu;
 
+static void resp_send(ble_dfu_t * p_dfu, ble_dfu_buttonless_op_code_t op_code, ble_dfu_rsp_code_t rsp_code);
 
 void flash_callback(fs_evt_t const * const evt, fs_ret_t result)
 {
@@ -62,9 +66,13 @@ void flash_callback(fs_evt_t const * const evt, fs_ret_t result)
     {
         NRF_LOG_INFO("Obtained settings, enter dfu is %d\n", s_dfu_settings.enter_buttonless_dfu);
 
-        (void)sd_ble_gap_disconnect(p_m_dfu->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+        resp_send(p_m_dfu, DFU_OP_ENTER_BOOTLOADER, DFU_RSP_SUCCESS);
+        nrf_delay_ms(200);
+        NVIC_SystemReset();
 
-        p_m_dfu->is_waiting_for_disconnection = true;
+//        (void)sd_ble_gap_disconnect(p_m_dfu->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+
+//        p_m_dfu->is_waiting_for_disconnection = true;
     }
 }
 
@@ -124,7 +132,7 @@ static uint32_t rx_char_add(ble_dfu_t * p_dfu, const ble_dfu_init_t * p_dfu_init
     char_md.p_sccd_md         = NULL;
 
     ble_uuid.type = p_dfu->uuid_type;
-    ble_uuid.uuid = 0x0001;
+    ble_uuid.uuid = BLE_DFU_BUTTONLESS_CHAR_UUID;
 
     memset(&attr_md, 0, sizeof(attr_md));
 
@@ -157,7 +165,7 @@ uint32_t ble_dfu_init(ble_dfu_t * p_dfu, const ble_dfu_init_t * p_dfu_init)
 {
     uint32_t      err_code;
     ble_uuid_t    ble_uuid;
-    ble_uuid128_t nus_base_uuid = BLE_DFU_BASE_UUID;
+    ble_uuid128_t nus_base_uuid = BLE_NORDIC_VENDOR_BASE_UUID;
 
     VERIFY_PARAM_NOT_NULL(p_dfu);
     VERIFY_PARAM_NOT_NULL(p_dfu_init);
@@ -170,19 +178,18 @@ uint32_t ble_dfu_init(ble_dfu_t * p_dfu, const ble_dfu_init_t * p_dfu_init)
     p_dfu->is_waiting_for_disconnection = false;
     p_dfu->is_ctrlpt_notification_enabled = false;
 
-    /**@snippet [Adding proprietary Service to S110 SoftDevice] */
-    // Add a custom base UUID.
-    err_code = sd_ble_uuid_vs_add(&nus_base_uuid, &p_dfu->uuid_type);
-    VERIFY_SUCCESS(err_code);
-
-    ble_uuid.type = p_dfu->uuid_type;
-    ble_uuid.uuid = BLE_UUID_DFU_SERVICE;
+    BLE_UUID_BLE_ASSIGN(ble_uuid, BLE_DFU_SERVICE_UUID);
 
     // Add the service.
     err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY,
                                         &ble_uuid,
                                         &p_dfu->service_handle);
     /**@snippet [Adding proprietary Service to S110 SoftDevice] */
+    VERIFY_SUCCESS(err_code);
+
+    /**@snippet [Adding proprietary Service to S110 SoftDevice] */
+    // Add a custom base UUID.
+    err_code = sd_ble_uuid_vs_add(&nus_base_uuid, &p_dfu->uuid_type);
     VERIFY_SUCCESS(err_code);
 
     // Add the RX Characteristic.
