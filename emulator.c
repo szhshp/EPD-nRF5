@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <stdint.h>
 #include <time.h>
+#include <string.h>
+#include <wchar.h>
 #include "GUI.h"
 
 #define BITMAP_WIDTH   400
@@ -180,6 +182,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             SelectObject(hdc, oldBrush);
             DeleteObject(borderPen);
             
+            // Draw help text below the bitmap
+            int helpTextY = drawY + BITMAP_HEIGHT * scale + 5;
+            SetTextColor(hdc, RGB(80, 80, 80));
+            SetBkMode(hdc, TRANSPARENT);
+            
+            // Create a smaller font for help text
+            HFONT helpFont = CreateFont(
+                14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial"
+            );
+            HFONT oldFont = SelectObject(hdc, helpFont);
+            
+            wchar_t helpText[] = L"快捷键: 空格 - 切换模式 | R - 切换BWR | 方向键 - 调整日期/月份";
+            
+            // Calculate text width for centering
+            SIZE textSize;
+            GetTextExtentPoint32W(hdc, helpText, wcslen(helpText), &textSize);
+            int centeredX = drawX + (BITMAP_WIDTH - textSize.cx) / 2;
+            
+            TextOutW(hdc, centeredX, helpTextY, helpText, wcslen(helpText));
+            
+            SelectObject(hdc, oldFont);
+            DeleteObject(helpFont);
+            
             // Use the stored timestamp
             gui_data_t data = {
                 .color           = g_bwr_mode ? 2 : 1,
@@ -284,7 +311,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     g_hwnd = CreateWindowA(
         "BitmapDemo",
         "Emurator", // Using simple title
-        WS_OVERLAPPEDWINDOW,
+        WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT,
         WINDOW_WIDTH, WINDOW_HEIGHT,
         NULL, NULL, hInstance, NULL
