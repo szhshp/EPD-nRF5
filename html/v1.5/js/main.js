@@ -289,14 +289,12 @@ function intToHex(intIn) {
 }
 
 async function update_image() {
-  let image = new Image();;
   const image_file = document.getElementById('image_file');
-  if (image_file.files.length > 0) {
-    const file = image_file.files[0];
-    image.src = URL.createObjectURL(file);
-  } else {
-    image.src = document.getElementById('demo-img').src;
-  }
+  if (image_file.files.length == 0) return;
+
+  let image = new Image();;
+  const file = image_file.files[0];
+  image.src = URL.createObjectURL(file);
 
   image.onload = function(event) {
     URL.revokeObjectURL(this.src);
@@ -361,8 +359,10 @@ document.body.onload = () => {
   canvas = document.getElementById('canvas');
   ctx = canvas.getContext("2d");
 
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   updateButtonStatus();
-  update_image();
   filterDitheringOptions();
 
   checkDebugMode();
