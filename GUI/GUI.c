@@ -233,11 +233,13 @@ static void DrawMonthDays(Adafruit_GFX *gfx, tm_t *tm, struct Lunar_Date *Lunar)
             GFX_setCursor(gfx, strlen(festival) > 6 ? x - 6 : x, y + 24);
             GFX_printf(gfx, "%s", festival);
         } else {
-            GFX_setCursor(gfx, x, y + 24);
-            if (Lunar->Date == 1)
-                GFX_printf(gfx, "%s", Lunar_MonthString[Lunar->Month]);
-            else
+            if (Lunar->Date == 1) {
+                GFX_setCursor(gfx, x - 5, y + 24);
+                GFX_printf(gfx, "%s%s", Lunar_MonthLeapString[Lunar->IsLeap], Lunar_MonthString[Lunar->Month]);
+            } else {
+                GFX_setCursor(gfx, x, y + 24);
                 GFX_printf(gfx, "%s", Lunar_DateString[Lunar->Date]);
+            }
         }
         bool work = false;
         if (year == HOLIDAY_YEAR && GetHoliday(month, day, &work)) {
