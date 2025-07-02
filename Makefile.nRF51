@@ -131,9 +131,9 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs -lc -lnosys
 
-nrf51822_xxaa: CFLAGS += -D__HEAP_SIZE=2048
+nrf51822_xxaa: CFLAGS += -D__HEAP_SIZE=1024
 nrf51822_xxaa: CFLAGS += -D__STACK_SIZE=2048
-nrf51822_xxaa: ASMFLAGS += -D__HEAP_SIZE=2048
+nrf51822_xxaa: ASMFLAGS += -D__HEAP_SIZE=1024
 nrf51822_xxaa: ASMFLAGS += -D__STACK_SIZE=2048
 
 

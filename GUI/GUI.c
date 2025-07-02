@@ -1,6 +1,7 @@
 #include "fonts.h"
 #include "Lunar.h"
 #include "GUI.h"
+#include <time.h>
 #include <stdio.h>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
@@ -146,8 +147,8 @@ static void DrawTimeSyncTip(Adafruit_GFX *gfx)
 static void DrawBattery(Adafruit_GFX *gfx, int16_t x, int16_t y, float voltage)
 {
     uint8_t level = (uint8_t)(voltage * 100 / 3.6f);
-    GFX_setCursor(gfx, x - 26, y + 9);
     GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
+    GFX_setCursor(gfx, x - GFX_getUTF8Width(gfx, "3.2V") - 2, y + 9);
     GFX_printf(gfx, "%.1fV", voltage);
     GFX_fillRect(gfx, x, y, 20, 10, GFX_WHITE);
     GFX_drawRect(gfx, x, y, 20, 10, GFX_BLACK);
@@ -162,25 +163,48 @@ static void DrawTemperature(Adafruit_GFX *gfx, int16_t x, int16_t y, int8_t temp
     GFX_printf(gfx, "%d℃", temp);
 }
 
+static uint8_t GetWeekOfYear(uint8_t year, uint8_t mon, uint8_t mday, uint8_t wday)
+{
+    struct tm tm = {0};
+    tm.tm_year = year;
+    tm.tm_mon = mon;
+    tm.tm_mday = mday;
+    tm.tm_wday = wday;
+    tm.tm_isdst = -1;
+    mktime(&tm);
+    char buffer[3] = {0};
+    strftime(buffer, 3, "%V", &tm);
+    return atoi(buffer);
+}
+
 static void DrawDateHeader(Adafruit_GFX *gfx, int16_t x, int16_t y, tm_t *tm, struct Lunar_Date *Lunar, gui_data_t *data)
 {
-    GFX_setCursor(gfx, x, y);
+    GFX_setCursor(gfx, x, y - 2);
     GFX_printf_styled(gfx, GFX_RED, GFX_WHITE, u8g2_font_helvB18_tn, "%d", tm->tm_year + YEAR0);
     GFX_printf_styled(gfx, GFX_BLACK, GFX_WHITE, u8g2_font_wqy12_t_lunar, "年");
     GFX_printf_styled(gfx, GFX_RED, GFX_WHITE, u8g2_font_helvB18_tn, "%d", tm->tm_mon + 1);
     GFX_printf_styled(gfx, GFX_BLACK, GFX_WHITE, u8g2_font_wqy12_t_lunar, "月");
 
+    int16_t tx = gfx->tx;
+    int16_t ty = y;
+
     GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
+    GFX_setCursor(gfx, tx, ty);
     if (Lunar->IsLeap) GFX_printf(gfx, " ");
-    GFX_printf(gfx, "%s%s%s %s%s年", Lunar_MonthLeapString[Lunar->IsLeap], Lunar_MonthString[Lunar->Month],
-                     Lunar_DateString[Lunar->Date], Lunar_StemStrig[LUNAR_GetStem(Lunar)],
-                     Lunar_BranchStrig[LUNAR_GetBranch(Lunar)]);
+    GFX_printf(gfx, "%s%s%s", Lunar_MonthLeapString[Lunar->IsLeap], Lunar_MonthString[Lunar->Month],
+                     Lunar_DateString[Lunar->Date]);
     GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
-    GFX_printf(gfx, "[%s]", Lunar_ZodiacString[LUNAR_GetZodiac(Lunar)]);
+    GFX_printf(gfx, " [%d周]", GetWeekOfYear(tm->tm_year, tm->tm_mon, tm->tm_mday, tm->tm_wday));
+ 
+    GFX_setCursor(gfx, tx, ty - 14);
+    GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
+    GFX_printf(gfx, " %s%s年", Lunar_StemStrig[LUNAR_GetStem(Lunar)], Lunar_BranchStrig[LUNAR_GetBranch(Lunar)]);
+    GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
+    GFX_printf(gfx, " [%s]", Lunar_ZodiacString[LUNAR_GetZodiac(Lunar)]);
 
     GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
     DrawBattery(gfx, 366, 6, data->voltage);
-    GFX_setCursor(gfx, 310, y);
+    GFX_setCursor(gfx, data->width - GFX_getUTF8Width(gfx, "NRF_EPD_84AC") - 10, y);
     GFX_printf(gfx, "%s", data->ssid);
 }
 
