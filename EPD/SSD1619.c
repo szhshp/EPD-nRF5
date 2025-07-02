@@ -77,11 +77,6 @@ int8_t SSD1619_Read_Temp(void)
     return (int8_t)EPD_ReadByte();
 }
 
-void SSD1619_Force_Temp(int8_t value)
-{
-    EPD_Write(CMD_TSENSOR_WRITE, value);
-}
-
 static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     EPD_Write(CMD_ENTRY_MODE, 0x03); // set ram entry mode: x increase, y increase
@@ -97,10 +92,6 @@ static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 void SSD1619_Dump_LUT(void)
 {
     uint8_t lut[128];
-
-    // Load LUT
-    SSD1619_Update(0xB1);
-    SSD1619_WaitBusy(200);
 
     EPD_WriteCmd(CMD_READ_LUT);
     EPD_ReadData(lut, sizeof(lut));
@@ -122,8 +113,6 @@ void SSD1619_Init()
     EPD_Write(CMD_BORDER_CTRL, 0x01);
     EPD_Write(CMD_TSENSOR_CTRL, 0x80);
 
-//    SSD1619_Dump_LUT();
-
     _setPartialRamArea(0, 0, EPD->width, EPD->height);
 }
 
@@ -138,6 +127,8 @@ static void SSD1619_Refresh(void)
     SSD1619_Update(0xF7);
     SSD1619_WaitBusy(30000);
     NRF_LOG_DEBUG("[EPD]: refresh end\n");
+
+//    SSD1619_Dump_LUT();
 
     _setPartialRamArea(0, 0, EPD->width, EPD->height); // DO NOT REMOVE!
     SSD1619_Update(0x83);                              // power off
@@ -212,7 +203,6 @@ static epd_driver_t epd_drv_ssd1619 = {
     .refresh = SSD1619_Refresh,
     .sleep = SSD1619_Sleep,
     .read_temp = SSD1619_Read_Temp,
-    .force_temp = SSD1619_Force_Temp,
 };
 
 // SSD1619 400x300 Black/White/Red

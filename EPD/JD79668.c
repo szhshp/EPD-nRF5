@@ -63,12 +63,6 @@ int8_t JD79668_Read_Temp(void)
     return (int8_t)EPD_ReadByte();
 }
 
-void JD79668_Force_Temp(int8_t value)
-{
-    EPD_Write(CMD_CCSET, 0x02);
-    EPD_Write(0xE6, value);
-}
-
 static void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     EPD_Write(CMD_PTL,
@@ -194,7 +188,6 @@ static epd_driver_t epd_drv_JD79668 = {
     .refresh = JD79668_Refresh,
     .sleep = JD79668_Sleep,
     .read_temp = JD79668_Read_Temp,
-    .force_temp = JD79668_Force_Temp,
 };
 
 // JD79668 400x300 Black/White/Red/Yellow

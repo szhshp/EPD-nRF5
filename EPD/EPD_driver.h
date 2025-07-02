@@ -37,7 +37,6 @@ typedef struct
     void (*refresh)(void);                            /**< Sends the image buffer in RAM to e-Paper and displays */
     void (*sleep)(void);                              /**< Enter sleep mode */
     int8_t (*read_temp)(void);                        /**< Read temperature from driver chip */
-    void (*force_temp)(int8_t value);                 /**< Force temperature (will trigger OTP LUT switch) */
 } epd_driver_t;
 
 typedef enum

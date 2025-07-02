@@ -98,13 +98,6 @@ int8_t UC8176_Read_Temp(void)
     return (int8_t)EPD_ReadByte();
 }
 
-// Force temperature (will trigger OTP LUT switch)
-void UC8176_Force_Temp(int8_t value)
-{
-    EPD_Write(CMD_CCSET, 0x02);
-    EPD_Write(CMD_TSSET, value);
-}
-
 void UC8176_Refresh(void)
 {
     NRF_LOG_DEBUG("[EPD]: refresh begin\n");
@@ -235,7 +228,6 @@ static epd_driver_t epd_drv_uc8176 = {
     .refresh = UC8176_Refresh,
     .sleep = UC8176_Sleep,
     .read_temp = UC8176_Read_Temp,
-    .force_temp = UC8176_Force_Temp,
 };
 
 // UC8176 400x300 Black/White
