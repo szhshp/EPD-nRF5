@@ -18,6 +18,7 @@ typedef struct {
     uint16_t width;
     uint16_t height;
     uint32_t timestamp;
+    uint8_t week_start; // 0: Sunday, 1: Monday
     int8_t temperature;
     float voltage;
     char ssid[13];

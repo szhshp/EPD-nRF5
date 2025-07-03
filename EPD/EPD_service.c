@@ -44,6 +44,7 @@ static void epd_gui_update(void * p_event_data, uint16_t event_size)
         .width           = epd->width,
         .height          = epd->height,
         .timestamp       = event->timestamp,
+        .week_start      = p_epd->config.week_start,
         .temperature     = epd->drv->read_temp(),
         .voltage         = EPD_ReadVoltage(),
     };
@@ -181,6 +182,14 @@ static void epd_service_on_write(ble_epd_t * p_epd, uint8_t * p_data, uint16_t l
           epd_update_display_mode(p_epd, length > 6 ? (display_mode_t)p_data[6] : MODE_CALENDAR);
           ble_epd_on_timer(p_epd, timestamp, true);
       } break;
+
+      case EPD_CMD_SET_WEEK_START:
+          if (length < 2) return;
+          if (p_data[1] < 7 && p_data[1] != p_epd->config.week_start) {
+              p_epd->config.week_start = p_data[1];
+              epd_config_write(&p_epd->config);
+          }
+          break;
 
       case EPD_CMD_WRITE_IMAGE: // MSB=0000: ram begin, LSB=1111: black
           if (length < 3) return;
@@ -366,6 +375,8 @@ uint32_t ble_epd_init(ble_epd_t * p_epd)
         memcpy(&p_epd->config, cfg, sizeof(cfg));
         if (p_epd->config.display_mode == 0xFF)
             p_epd->config.display_mode = MODE_CALENDAR;
+        if (p_epd->config.week_start == 0xFF)
+            p_epd->config.week_start = 0;
         epd_config_write(&p_epd->config);
     }
 

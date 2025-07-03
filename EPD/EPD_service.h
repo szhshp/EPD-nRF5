@@ -62,22 +62,23 @@ void ble_epd_evt_handler(ble_evt_t const * p_ble_evt, void * p_context);
 /**< EPD Service command IDs. */
 enum EPD_CMDS
 {
-    EPD_CMD_SET_PINS     = 0x00,                        /**< set EPD pin mapping. */
-    EPD_CMD_INIT         = 0x01,                        /**< init EPD display driver */
-    EPD_CMD_CLEAR        = 0x02,                        /**< clear EPD screen */
-    EPD_CMD_SEND_COMMAND = 0x03,                        /**< send command to EPD */
-    EPD_CMD_SEND_DATA    = 0x04,                        /**< send data to EPD */
-    EPD_CMD_REFRESH      = 0x05,                        /**< diaplay EPD ram on screen */
-    EPD_CMD_SLEEP        = 0x06,                        /**< EPD enter sleep mode */
+    EPD_CMD_SET_PINS       = 0x00,                        /**< set EPD pin mapping. */
+    EPD_CMD_INIT           = 0x01,                        /**< init EPD display driver */
+    EPD_CMD_CLEAR          = 0x02,                        /**< clear EPD screen */
+    EPD_CMD_SEND_COMMAND   = 0x03,                        /**< send command to EPD */
+    EPD_CMD_SEND_DATA      = 0x04,                        /**< send data to EPD */
+    EPD_CMD_REFRESH        = 0x05,                        /**< diaplay EPD ram on screen */
+    EPD_CMD_SLEEP          = 0x06,                        /**< EPD enter sleep mode */
 
-	EPD_CMD_SET_TIME     = 0x20,                        /** < set time with unix timestamp */
+	EPD_CMD_SET_TIME       = 0x20,                        /** < set time with unix timestamp */
+    EPD_CMD_SET_WEEK_START = 0x21,                        /** < set week start day (0: Sunday, 1: Monday, ...) */
 
-    EPD_CMD_WRITE_IMAGE  = 0x30,                        /** < write image data to EPD ram */
+    EPD_CMD_WRITE_IMAGE    = 0x30,                        /** < write image data to EPD ram */
 
-    EPD_CMD_SET_CONFIG   = 0x90,                        /**< set full EPD config */
-    EPD_CMD_SYS_RESET    = 0x91,                        /**< MCU reset */
-    EPD_CMD_SYS_SLEEP    = 0x92,                        /**< MCU enter sleep mode */
-    EPD_CMD_CFG_ERASE    = 0x99,                        /**< Erase config and reset */
+    EPD_CMD_SET_CONFIG     = 0x90,                        /**< set full EPD config */
+    EPD_CMD_SYS_RESET      = 0x91,                        /**< MCU reset */
+    EPD_CMD_SYS_SLEEP      = 0x92,                        /**< MCU enter sleep mode */
+    EPD_CMD_CFG_ERASE      = 0x99,                        /**< Erase config and reset */
 };
 
 /**@brief EPD Service structure.

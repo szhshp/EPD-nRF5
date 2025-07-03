@@ -17,6 +17,7 @@ typedef struct
     uint8_t led_pin;
     uint8_t en_pin;
     uint8_t display_mode;
+    uint8_t week_start;
 } epd_config_t;
 
 #define EPD_CONFIG_SIZE (sizeof(epd_config_t) / sizeof(uint8_t))

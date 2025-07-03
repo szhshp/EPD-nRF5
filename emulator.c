@@ -16,13 +16,15 @@
 // Global variables
 HINSTANCE g_hInstance;
 HWND g_hwnd;
+HDC g_paintHDC = NULL;
 display_mode_t g_display_mode = MODE_CALENDAR; // Default to calendar mode
 BOOL g_bwr_mode = TRUE;  // Default to BWR mode
+uint8_t g_week_start = 0; // Default week start (0=Sunday, 1=Monday, etc.)
 time_t g_display_time;
 struct tm g_tm_time;
 
-// Add a global variable for the paint HDC
-static HDC g_paintHDC = NULL;
+// Help text for hotkeys
+static const wchar_t helpText[] = L"空格 - 切换时钟 | R - 切换颜色 | W - 星期起点 | 方向键 - 调整日期/月份";
 
 // Implementation of the buffer_callback function
 void DrawBitmap(uint8_t *black, uint8_t *color, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
@@ -195,8 +197,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             );
             HFONT oldFont = SelectObject(hdc, helpFont);
             
-            wchar_t helpText[] = L"快捷键: 空格 - 切换模式 | R - 切换BWR | 方向键 - 调整日期/月份";
-            
             // Calculate text width for centering
             SIZE textSize;
             GetTextExtentPoint32W(hdc, helpText, wcslen(helpText), &textSize);
@@ -213,6 +213,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 .width           = BITMAP_WIDTH,
                 .height          = BITMAP_HEIGHT,
                 .timestamp       = g_display_time,
+                .week_start      = g_week_start,
                 .temperature     = 25,
                 .voltage         = 3.2f,
                 .ssid            = "NRF_EPD_84AC",
@@ -241,6 +242,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             // Toggle BWR mode with R key
             else if (wParam == 'R') {
                 g_bwr_mode = !g_bwr_mode;
+                InvalidateRect(hwnd, NULL, TRUE);
+            }
+            // Increase week start with W key
+            else if (wParam == 'W') {
+                g_week_start++;
+                if (g_week_start > 6) g_week_start = 0; // Wrap around
                 InvalidateRect(hwnd, NULL, TRUE);
             }
             // Handle arrow keys for month/day adjustment
