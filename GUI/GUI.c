@@ -130,18 +130,25 @@ static bool GetFestival(uint16_t year, uint8_t mon, uint8_t day, uint8_t week,
     return false;
 }
 
-static void DrawTimeSyncTip(Adafruit_GFX *gfx)
+static void DrawTimeSyncTip(Adafruit_GFX *gfx, gui_data_t *data)
 {
-    GFX_setFont(gfx, u8g2_font_wqy12_t_lunar);
-    GFX_fillRect(gfx, gfx->_width / 2 - 100, gfx->_height / 2 - 25, 200, 50, GFX_WHITE);
-    GFX_drawRoundRect(gfx, gfx->_width / 2 - 100, gfx->_height / 2 - 25, 200, 50, 5, GFX_BLACK);
-    GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
-    GFX_setCursor(gfx, 149, 145);
-    GFX_printf(gfx, "SYNC TIME!");
-    GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
-    GFX_setCursor(gfx, 110, 164);
+    const char *title = "SYNC TIME!";
+    const char *url = "https://tsl0922.github.io/EPD-nRF5";
+
+    int16_t box_w = GFX_getUTF8Width(gfx, url) + 20;
+    int16_t box_h = 50;
+    int16_t box_x = (data->width - box_w) / 2;
+    int16_t box_y = data->height / 2 - box_h / 2;
+
     GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
-    GFX_printf(gfx, "https://tsl0922.github.io/EPD-nRF5");
+    GFX_fillRect(gfx, box_x, box_y, box_w, box_h, GFX_WHITE);
+    GFX_drawRoundRect(gfx, box_x, box_y, box_w, box_h, 5, GFX_BLACK);
+    GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
+    GFX_setCursor(gfx, box_x + (box_w - GFX_getUTF8Width(gfx, title)) / 2, 145);
+    GFX_printf(gfx, title);
+    GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
+    GFX_setCursor(gfx, box_x + 10, 164);
+    GFX_printf(gfx, url);
 }
 
 static void DrawBattery(Adafruit_GFX *gfx, int16_t x, int16_t y, float voltage)
@@ -420,7 +427,7 @@ void DrawGUI(gui_data_t *data, buffer_callback draw, display_mode_t mode)
         }
         if ((mode == MODE_CALENDAR || mode == MODE_CLOCK) &&
             (tm.tm_year + YEAR0 == 2025 && tm.tm_mon + 1 == 1)) {
-            DrawTimeSyncTip(&gfx);
+            DrawTimeSyncTip(&gfx, data);
         }
     } while(GFX_nextPage(&gfx, draw));
 
