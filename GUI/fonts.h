@@ -26,13 +26,8 @@
 extern const uint8_t u8g2_font_wqy9_t_lunar[] U8G2_FONT_SECTION("u8g2_font_wqy9_t_lunar");
 /**
  * 文字列表:
-所有 ASCII 字符 (32-128)
-猴鸡狗猪鼠牛虎兔龙蛇马羊
-庚辛壬癸甲乙丙丁戊已
-申酉戌亥子丑寅卯辰巳午未
-小寒大寒立春雨水惊蛰春分清明谷雨立夏小满芒种夏至小暑大暑立秋处暑白露秋分寒露霜降立冬小雪大雪冬至
+0-9 (48-57)
 年月日
-离还有天
  */
 extern const uint8_t u8g2_font_wqy12_t_lunar[] U8G2_FONT_SECTION("u8g2_font_wqy12_t_lunar");
 

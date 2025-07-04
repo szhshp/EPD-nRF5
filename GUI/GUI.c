@@ -354,21 +354,33 @@ static void DrawClock(Adafruit_GFX *gfx, tm_t *tm, struct Lunar_Date *Lunar, gui
     DrawTime(gfx, tm, 70, 98, 5, 2);
     GFX_drawFastHLine(gfx, 30, 232, 330, GFX_BLACK);
 
-    GFX_setCursor(gfx, 40, 275);
-    GFX_setFont(gfx, u8g2_font_wqy12_t_lunar);
-    GFX_printf(gfx, "%s%s%s年", Lunar_StemStrig[LUNAR_GetStem(Lunar)], Lunar_BranchStrig[LUNAR_GetBranch(Lunar)],
-        Lunar_ZodiacString[LUNAR_GetZodiac(Lunar)]);
+    GFX_setCursor(gfx, 40, 265);
+    GFX_setFont(gfx, u8g2_font_wqy9_t_lunar);
+    GFX_printf(gfx, "%s%s", Lunar_StemStrig[LUNAR_GetStem(Lunar)], Lunar_BranchStrig[LUNAR_GetBranch(Lunar)]);
+    GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
+    GFX_printf(gfx, "%s", Lunar_ZodiacString[LUNAR_GetZodiac(Lunar)]);
+    GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
+    GFX_printf(gfx, "年");
+
+    GFX_setCursor(gfx, 40, 285);
+    GFX_printf(gfx, " %d周", GetWeekOfYear(tm->tm_year, tm->tm_mon, tm->tm_mday, tm->tm_wday));
 
     uint8_t day = 0;
     uint8_t JQday = GetJieQiStr(tm->tm_year + YEAR0, tm->tm_mon + 1, tm->tm_mday, &day);
     if (day == 0) {
-        GFX_setCursor(gfx, 320, 275);
+        GFX_setCursor(gfx, data->width - GFX_getUTF8Width(gfx, "小暑") - 50, 275);
+        GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
         GFX_printf(gfx, "%s", JieQiStr[JQday % 24]);
     } else {
-        GFX_setCursor(gfx, 300, 265);
-        GFX_printf(gfx, "离%s", JieQiStr[JQday % 24]);
-        GFX_setCursor(gfx, 290, 285);
-        GFX_printf(gfx, "还有%d天", day);
+        GFX_setCursor(gfx, data->width - GFX_getUTF8Width(gfx, "离小暑") - 50, 265);
+        GFX_printf(gfx, "离%");
+        GFX_setTextColor(gfx, GFX_RED, GFX_WHITE);
+        GFX_printf(gfx, "%s", JieQiStr[JQday % 24]);
+        GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
+        char buf[15] = {0};
+        snprintf(buf, sizeof(buf), "还有%d天", day);
+        GFX_setCursor(gfx, data->width - GFX_getUTF8Width(gfx, buf) - 50, 285);
+        GFX_printf(gfx, buf);
     }
 }
 
