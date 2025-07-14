@@ -125,6 +125,9 @@ async function setDriver() {
 }
 
 async function syncTime(mode) {
+  if (mode === 2) {
+    if (!confirm('提醒：时钟模式目前使用全刷实现，仅供体验，不建议长期开启，是否继续?')) return;
+  }
   const timestamp = new Date().getTime() / 1000;
   const data = new Uint8Array([
     (timestamp >> 24) & 0xFF,
@@ -162,12 +165,10 @@ async function sendimg() {
   const selectedOption = epdDriverSelect.options[epdDriverSelect.selectedIndex];
 
   if (selectedOption.getAttribute('data-size') !== canvasSize) {
-    addLog(`画布尺寸和驱动不匹配，请重新选择。`);
-    return;
+    if (!confirm("警告：画布尺寸和驱动不匹配，是否继续？")) return;
   }
   if (selectedOption.getAttribute('data-color') !== ditherMode) {
-    addLog(`颜色模式和驱动不匹配，请重新选择。`);
-    return;
+    if (!confirm("警告：颜色模式和驱动不匹配，是否继续？")) return;
   }
 
   startTime = new Date().getTime();
