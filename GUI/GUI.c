@@ -211,8 +211,8 @@ static void DrawDateHeader(Adafruit_GFX *gfx, int16_t x, int16_t y, tm_t *tm, st
     GFX_printf(gfx, " [%s]", Lunar_ZodiacString[LUNAR_GetZodiac(Lunar)]);
 
     GFX_setTextColor(gfx, GFX_BLACK, GFX_WHITE);
-    DrawBattery(gfx, data->width - 10, 6, 20, data->voltage);
-    GFX_setCursor(gfx, data->width - GFX_getUTF8Width(gfx, "NRF_EPD_84AC") - 10, y);
+    DrawBattery(gfx, data->width - 10 - 2, 6, 20, data->voltage);
+    GFX_setCursor(gfx, data->width - GFX_getUTF8Width(gfx, data->ssid) - 10, y);
     GFX_printf(gfx, "%s", data->ssid);
 }
 
