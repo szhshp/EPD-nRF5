@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>电子墨水屏蓝牙控制器</title>
-	<link rel="stylesheet" href="css/main.css?v=20250607">
+    <title>墨水屏日历</title>
+	<link rel="stylesheet" href="css/main.css?v=20250731">
 </head>
 
 <body>
     <div class="main">
-        <h3>电子墨水屏蓝牙控制器</h3>
+        <h3>墨水屏日历</h3>
         <fieldset>
             <legend>蓝牙连接</legend>
             <div class="flex-container">
@@ -18,9 +18,9 @@
                     <button id="reconnectbutton" type="button" class="secondary" onclick="reConnect()">重连</button>
 					<button type="button" class="secondary" onclick="clearLog()">清空日志</button>
                 </div>
-				<div class="flex-group debug">
+				<div class="flex-group right debug">
 					<label for="epddriver">驱动</label>
-					<select id="epddriver" onchange="updateDitcherOptions()">
+					<select id="epddriver">
 						<option value="01" data-color="blackWhiteColor" data-size="4.2_400_300">UC8176/UC8276(黑白)</option>
 						<option value="03" data-color="threeColor" data-size="4.2_400_300">UC8176/UC8276(三色)</option>
 						<option value="04" data-color="blackWhiteColor" data-size="4.2_400_300">SSD1619/SSD1683(黑白)</option>
@@ -33,28 +33,32 @@
 					<input id="epdpins" type="text" value="">
 					<button id="setDriverbutton" type="button" class="primary" onclick="setDriver()">确认</button>
 				</div>
-                <div class="flex-group">
+            </div>
+			<div id="log"></div>
+        </fieldset>
+		<fieldset>
+            <legend>设备控制</legend>
+            <div class="flex-container">
+				<div class="flex-group">
                     <button id="calendarmodebutton" type="button" class="primary" onclick="syncTime(1)">日历模式</button>
                     <button id="clockmodebutton" type="button" class="primary" onclick="syncTime(2)">时钟模式</button>
 					<button id="clearscreenbutton" type="button" class="secondary" onclick="clearScreen()">清除屏幕</button>
                 </div>
-                <div class="flex-group debug">
+                <div class="flex-group right debug">
                     <input type="text" id="cmdTXT" value="">
                     <button id="sendcmdbutton" type="button" class="primary" onclick="sendcmd()">发送命令</button>
                 </div>
-            </div>
-			<div id="log"></div>
-        </fieldset>
-
+			</div>
+		</fieldset>
 		<fieldset>
-        	<legend>蓝牙传图</legend>
+        	<legend>图片处理</legend>
 			<div class="flex-container">
-				<input type="file" id="image_file" onchange="updateImage(true)" accept=".png,.jpg,.bmp,.webp,.jpeg">
+				<input type="file" id="imageFile" accept=".png,.jpg,.bmp,.webp,.jpeg">
 			</div>
 			<div class="flex-container options">
 				<div class="flex-group debug">
-					<label for="canvasSize">画布尺寸：</label>
-					<select id="canvasSize" onchange="updateCanvasSize()">
+					<label for="canvasSize">画布尺寸:</label>
+					<select id="canvasSize">
 						<option value="1.54_152_152">1.54 (152x152)</option>
 						<option value="1.54_200_200">1.54 (200x200)</option>
 						<option value="2.13_212_104">2.13 (212x104)</option>
@@ -76,8 +80,8 @@
 					</select>
 				</div>
 				<div class="flex-group debug">
-					<label for="ditherMode">颜色模式：</label>
-					<select id="ditherMode" onchange="updateImage(false)">
+					<label for="ditherMode">颜色模式:</label>
+					<select id="ditherMode">
 						<option value="blackWhiteColor">双色(黑白)</option>
 						<option value="threeColor">三色(黑白红)</option>
 						<option value="fourColor">四色(黑白红黄)</option>
@@ -85,8 +89,8 @@
 					</select>
 				</div>
 				<div class="flex-group">
-					<label for="ditherType">抖动算法：</label>
-					<select id="ditherType" onchange="updateImage(false)">
+					<label for="ditherAlg">抖动算法:</label>
+					<select id="ditherAlg">
 						<option value="floydSteinberg">Floyd-Steinberg</option>
 						<option value="atkinson">Atkinson</option>
 						<option value="bayer">Bayer</option>
@@ -95,19 +99,21 @@
 					</select>
 				</div>
 				<div class="flex-group">
-					<label for="ditherStrength">抖动强度：</label>
-					<input type="range" min="0" max="5" step="0.1" value="1.0" id="ditherStrength" oninput="updateImage(false)">
+					<label for="ditherStrength">抖动强度:</label>
+					<input type="range" min="0" max="5" step="0.1" value="1.0" id="ditherStrength">
+					<label id="ditherStrengthValue">1.0</label>
 				</div>
 				<div class="flex-group">
-					<label for="contrast">对比度：</label>
-					<input type="range" min="0.5" max="2" step="0.1" value="1.2" id="contrast" oninput="updateImage(false)">
+					<label for="ditherContrast">对比度:</label>
+					<input type="range" min="0.5" max="2" step="0.1" value="1.2" id="ditherContrast">
+					<label id="ditherContrastValue">1.2</label>
 				</div>
 			</div>
 			<div class="flex-container options">
 				<div class="flex-group debug">
-					<label for="mtusize">MTU：</label>
+					<label for="mtusize">MTU:</label>
 					<input type="number" id="mtusize" value="20" min="0" max="255">
-					<label for="interleavedcount">确认间隔：</label>
+					<label for="interleavedcount">确认间隔:</label>
 					<input type="number" id="interleavedcount" value="50" min="0" max="500">
 				</div>
 			</div>
@@ -129,7 +135,7 @@
 						<button id="text-mode" title="添加文字" class="tool-button">T</button>
 					</div>
 					<div class="flex-group brush-tools">
-						<label for="brush-color">画笔：</label>
+						<label for="brush-color">颜色:</label>
 						<select id="brush-color">
                             <option value="#000000">黑色</option>
                             <option value="#FF0000">红色</option>
@@ -138,13 +144,13 @@
 							<option value="#0000FF">蓝色</option>
                             <option value="#FFFFFF">白色</option>
                         </select>
-						<label for="brush-size">粗细：</label>
+						<label for="brush-size">粗细:</label>
 						<input type="number" id="brush-size" value="2" min="1" max="100">
 					</div>
 				</div>
 				<div class="flex-container canvas-tools">
 					<div class="flex-group text-tools">
-						<label for="font-family">字体：</label>
+						<label for="font-family">字体:</label>
 						<select id="font-family">
 								<option value="Arial">Arial</option>
 								<option value="sans-serif">Sans-serif</option>
@@ -176,7 +182,7 @@
 								<option value="WenQuanYi Micro Hei">文泉驿微米黑</option>
 							</optgroup>
 						</select>
-						<label for="font-size">大小：</label>
+						<label for="font-size">大小:</label>
 						<input type="number" id="font-size" value="16" min="1" max="100">
 					</div>
 					<div class="flex-group text-tools">
@@ -197,9 +203,9 @@
 			</span>
 		</div>
     </div>
-    <script type="text/javascript" src="js/dithering.js?v=20250607"></script>
-    <script type="text/javascript" src="js/paint.js?v=20250607"></script>
-    <script type="text/javascript" src="js/main.js?v=20250607"></script>
+    <script type="text/javascript" src="js/dithering.js?v=20250731"></script>
+    <script type="text/javascript" src="js/paint.js?v=20250731"></script>
+    <script type="text/javascript" src="js/main.js?v=20250731"></script>
 </body>
 
 </html>
