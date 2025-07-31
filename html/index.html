@@ -51,7 +51,7 @@
 			</div>
 		</fieldset>
 		<fieldset>
-        	<legend>图片处理</legend>
+        	<legend>蓝牙传图</legend>
 			<div class="flex-container">
 				<input type="file" id="imageFile" accept=".png,.jpg,.bmp,.webp,.jpeg">
 			</div>
@@ -120,8 +120,9 @@
 			<div class="status-bar"><b>状态：</b><span id="status"></span></div>
 			<div class="flex-container">
 				<div class="flex-group">
-					<button id="clearcanvasbutton" type="button" class="secondary" onclick="clearCanvas()">清除画布</button>
-					<button id="downloadArray" type="button" class="secondary debug" onclick="downloadDataArray()">下载数组</button>
+					<button type="button" class="secondary debug" onclick="rotateCanvas()">旋转画布</button>
+					<button type="button" class="secondary" onclick="clearCanvas()">清除画布</button>
+					<button type="button" class="secondary debug" onclick="downloadDataArray()">下载数组</button>
 					<button id="sendimgbutton" type="button" class="primary" onclick="sendimg()">发送图片</button>
 				</div>
 			</div>
@@ -129,7 +130,7 @@
 				<div class="canvas-title"></div>
 				<canvas id="canvas" width="400" height="300"></canvas>
 				<div class="flex-container canvas-tools">
-					<div class="flex-group">
+					<div class="flex-group tool-buttons">
 						<button id="brush-mode" title="画笔" class="tool-button">✏️</button>
 						<button id="eraser-mode" title="橡皮擦" class="tool-button">🧽</button>
 						<button id="text-mode" title="添加文字" class="tool-button">T</button>
@@ -191,6 +192,15 @@
 						<button id="text-italic" title="斜体">I</button>
 						<button id="add-text-btn" class="primary">添加文字</button>
 					</div>
+					<div class="flex-group crop-tools">
+						<button id="crop-zoom-in" title="放大" class="secondary">+</button>
+						<button id="crop-zoom-out" title="缩小" class="secondary">-</button>
+						<button id="crop-move-left" title="左移">⇦</button>
+						<button id="crop-move-up" title="上移">⇧</button>
+						<button id="crop-move-down" title="下移">⇩</button>
+						<button id="crop-move-right" title="右移">⇨</button>
+						<button class="primary" onclick="finishCrop()">完成</button>
+					</div>
 				</div>
 			</div>
         </fieldset>
@@ -205,6 +215,7 @@
     </div>
     <script type="text/javascript" src="js/dithering.js?v=20250731"></script>
     <script type="text/javascript" src="js/paint.js?v=20250731"></script>
+    <script type="text/javascript" src="js/crop.js?v=20250731"></script>
     <script type="text/javascript" src="js/main.js?v=20250731"></script>
 </body>
 

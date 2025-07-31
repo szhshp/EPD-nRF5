@@ -159,6 +159,11 @@ async function sendcmd() {
 }
 
 async function sendimg() {
+  if (isCropMode()) {
+    addLog("请先完成图片裁剪！发送已取消。");
+    return;
+  }
+
   const canvasSize = document.getElementById('canvasSize').value;
   const ditherMode = document.getElementById('ditherMode').value;
   const epdDriverSelect = document.getElementById('epddriver');
@@ -207,6 +212,11 @@ async function sendimg() {
 }
 
 function downloadDataArray() {
+  if (isCropMode()) {
+    addLog("请先完成图片裁剪！下载已取消。");
+    return;
+  }
+
   const mode = document.getElementById('ditherMode').value;
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const processedData = processImageData(imageData, mode);
@@ -417,6 +427,35 @@ function clearLog() {
   document.getElementById("log").innerHTML = '';
 }
 
+function fillCanvas(style) {
+  ctx.fillStyle = style;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function updateImage() {
+  const imageFile = document.getElementById('imageFile');
+  if (imageFile.files.length == 0) {
+    fillCanvas('white');
+    return;
+  }
+
+  const image = new Image();
+  image.onload = function () {
+    URL.revokeObjectURL(this.src);
+    if (image.width / image.height == canvas.width / canvas.height) {
+      if (isCropMode()) exitCropMode();
+      ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+      redrawTextElements();
+      redrawLineSegments();
+      convertDithering();
+    } else {
+      addLog("图片宽高比例与画布不匹配，已进入裁剪模式。");
+      initializeCrop();
+    }
+  };
+  image.src = URL.createObjectURL(imageFile.files[0]);
+}
+
 function updateCanvasSize() {
   const selectedSizeName = document.getElementById('canvasSize').value;
   const selectedSize = canvasSizes.find(size => size.name === selectedSizeName);
@@ -424,7 +463,7 @@ function updateCanvasSize() {
   canvas.width = selectedSize.width;
   canvas.height = selectedSize.height;
 
-  updateImage(false);
+  updateImage();
 }
 
 function updateDitcherOptions() {
@@ -439,33 +478,21 @@ function updateDitcherOptions() {
   updateCanvasSize(); // always update image
 }
 
-function updateImage(clear = false) {
-  const imageFile = document.getElementById('imageFile');
-  if (imageFile.files.length == 0) return;
-  const file = imageFile.files[0];
-
-  if (clear) clearCanvas();
-
-  let image = new Image();
-  image.src = URL.createObjectURL(file);
-  image.onload = function (event) {
-    URL.revokeObjectURL(this.src);
-    ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
-
-    // Redraw text and lines
-    redrawTextElements();
-    redrawLineSegments();
-
-    convertDithering()
-  }
+function rotateCanvas() {
+  const currentWidth = canvas.width;
+  const currentHeight = canvas.height;
+  canvas.width = currentHeight;
+  canvas.height = currentWidth;
+  addLog(`画布已旋转: ${currentWidth}x${currentHeight} -> ${canvas.width}x${canvas.height}`);
+  updateImage();
 }
 
 function clearCanvas() {
-  if (confirm('清除画布已有内容?')) {
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (confirm('清除画布内容?')) {
+    fillCanvas('white');
     textElements = []; // Clear stored text positions
     lineSegments = []; // Clear stored line segments
+    if (isCropMode()) exitCropMode();
     return true;
   }
   return false;
@@ -492,15 +519,15 @@ function convertDithering() {
 
 function initEventHandlers() {
   document.getElementById("epddriver").addEventListener("change", updateDitcherOptions);
-  document.getElementById("imageFile").addEventListener("change", function () { updateImage(true); });
-  document.getElementById("ditherMode").addEventListener("change", function () { updateImage(false); });
-  document.getElementById("ditherAlg").addEventListener("change", function () { updateImage(false); });
+  document.getElementById("imageFile").addEventListener("change", updateImage);
+  document.getElementById("ditherMode").addEventListener("change", finishCrop);
+  document.getElementById("ditherAlg").addEventListener("change", finishCrop);
   document.getElementById("ditherStrength").addEventListener("input", function () {
-    updateImage(false);
+    finishCrop();
     document.getElementById("ditherStrengthValue").innerText = parseFloat(this.value).toFixed(1);
   });
   document.getElementById("ditherContrast").addEventListener("input", function () {
-    updateImage(false);
+    finishCrop();
     document.getElementById("ditherContrastValue").innerText = parseFloat(this.value).toFixed(1);
   });
   document.getElementById("canvasSize").addEventListener("change", updateCanvasSize);
@@ -532,6 +559,7 @@ document.body.onload = () => {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   initPaintTools();
+  initCropTools();
   initEventHandlers();
   updateButtonStatus();
   checkDebugMode();

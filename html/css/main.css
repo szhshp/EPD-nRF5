@@ -257,6 +257,11 @@ code {
     margin: 0 auto;
 }
 
+.canvas-container.crop #canvas {
+    border: 2px dashed var(--primary-color);
+    cursor: grab;
+}
+
 button {
     padding: 0.375rem 0.75rem;
     border: 1px solid var(--primary-color);
@@ -367,8 +372,19 @@ canvas.text-placement-mode {
     justify-content: center;
 }
 
-.text-tools {
+.text-tools,
+.crop-tools {
     display: none;
+}
+
+.canvas-container.crop .tool-buttons,
+.canvas-container.crop .brush-buttons,
+.canvas-container.crop .text-tools {
+    display: none;
+}
+
+.canvas-container.crop .crop-tools {
+    display: flex;
 }
 
 .tool-button {
