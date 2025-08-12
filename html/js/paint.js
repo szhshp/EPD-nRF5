@@ -115,9 +115,9 @@ function setupCanvasForPainting() {
   canvas.addEventListener('click', handleCanvasClick);
   
   // Touch support
-  canvas.addEventListener('touchstart', handleTouchStart);
-  canvas.addEventListener('touchmove', handleTouchMove);
-  canvas.addEventListener('touchend', endPaint);
+  canvas.addEventListener('touchstart', onTouchStart);
+  canvas.addEventListener('touchmove', onTouchMove);
+  canvas.addEventListener('touchend', onTouchEnd);
 }
 
 function startPaint(e) {
@@ -225,7 +225,7 @@ function handleCanvasClick(e) {
 }
 
 // Improve touch handling for text placement
-function handleTouchStart(e) {
+function onTouchStart(e) {
     e.preventDefault();
     const touch = e.touches[0];
     
@@ -247,7 +247,7 @@ function handleTouchStart(e) {
     canvas.dispatchEvent(mouseEvent);
 }
 
-function handleTouchMove(e) {
+function onTouchMove(e) {
     e.preventDefault();
     const touch = e.touches[0];
     const mouseEvent = new MouseEvent('mousemove', {
@@ -255,6 +255,11 @@ function handleTouchMove(e) {
         clientY: touch.clientY
     });
     canvas.dispatchEvent(mouseEvent);
+}
+
+function onTouchEnd(e) {
+    e.preventDefault();
+    endPaint();
 }
 
 function dragText(e) {
