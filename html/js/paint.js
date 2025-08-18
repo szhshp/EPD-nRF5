@@ -59,6 +59,12 @@ function initPaintTools() {
     brushSize = parseInt(e.target.value);
   });
 
+  document.body.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      startTextPlacement();
+    }
+  });
+
   document.getElementById('add-text-btn').addEventListener('click', startTextPlacement);
 
   // Add event listeners for bold and italic buttons

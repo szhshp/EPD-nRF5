@@ -169,9 +169,9 @@ async function sendimg() {
   const epdDriverSelect = document.getElementById('epddriver');
   const selectedOption = epdDriverSelect.options[epdDriverSelect.selectedIndex];
 
-  if (selectedOption.getAttribute('data-size') !== canvasSize) {
-    if (!confirm("警告：画布尺寸和驱动不匹配，是否继续？")) return;
-  }
+  // if (selectedOption.getAttribute('data-size') !== canvasSize) {
+  //   if (!confirm("警告：画布尺寸和驱动不匹配，是否继续？")) return;
+  // }
   if (selectedOption.getAttribute('data-color') !== ditherMode) {
     if (!confirm("警告：颜色模式和驱动不匹配，是否继续？")) return;
   }
