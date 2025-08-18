@@ -62,6 +62,31 @@ function initPaintTools() {
   document.body.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       startTextPlacement();
+
+            /* simulate place text */
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      // Create a proper event object with viewport-relative coordinates
+      const rect = canvas.getBoundingClientRect();
+      const simulatedEvent = {
+        clientX: rect.left + centerX * (rect.width / canvas.width),
+        clientY: rect.top + centerY * (rect.height / canvas.height)
+      };
+      
+      // Try both approaches: dispatch event and direct call
+      try {
+        // Dispatch the event to trigger the normal click flow
+        canvas.dispatchEvent(new MouseEvent('click', simulatedEvent));
+        
+        // Also try calling placeText directly as a fallback
+        if (isTextPlacementMode) {
+          placeText(simulatedEvent);
+        }
+      } catch (error) {
+        console.error('Error simulating click:', error);
+      }
+
     }
   });
 
@@ -340,9 +365,9 @@ function startTextPlacement() {
 
   isTextPlacementMode = true;
 
-  // // Add visual feedback
-  // setCanvasTitle('点击画布放置文字');
-  // canvas.classList.add('text-placement-mode');
+  // Add visual feedback
+  setCanvasTitle('点击画布放置文字');
+  canvas.classList.add('text-placement-mode');
 }
 
 function cancelTextPlacement() {
