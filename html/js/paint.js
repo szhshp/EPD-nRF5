@@ -76,6 +76,13 @@ function initPaintTools() {
 
   // Ensure no tool is selected by default
   updateToolUI();
+  
+  // 默认选中文字工具模式
+  setTimeout(() => {
+    setActiveTool('text', '插入文字');
+    // 自动聚焦到文字输入框
+    document.getElementById('text-input').focus();
+  }, 100);
 }
 
 function setActiveTool(tool, title) {

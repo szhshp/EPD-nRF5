@@ -180,8 +180,18 @@ async function sendimg() {
   const status = document.getElementById("status");
   status.parentElement.style.display = "block";
 
+  // 获取原始图像数据
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const processedData = processImageData(imageData, ditherMode);
+  
+  // 在发送前对图像数据进行90度旋转
+  const rotatedImageData = rotateImageData90Degrees(imageData);
+  
+  // 处理旋转后的图像数据
+  // 注意：旋转后的图像数据宽高已经交换
+  const processedData = processImageData(rotatedImageData, ditherMode);
+  
+  // 记录旋转信息用于调试
+  addLog(`发送图片：原始尺寸 ${imageData.width}x${imageData.height}，旋转后尺寸 ${rotatedImageData.width}x${rotatedImageData.height}`);
 
   updateButtonStatus(true);
 
@@ -218,8 +228,18 @@ function downloadDataArray() {
   }
 
   const mode = document.getElementById('ditherMode').value;
+  
+  // 获取原始图像数据
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const processedData = processImageData(imageData, mode);
+  
+  // 在下载前对图像数据进行90度旋转
+  const rotatedImageData = rotateImageData90Degrees(imageData);
+  
+  // 处理旋转后的图像数据
+  const processedData = processImageData(rotatedImageData, mode);
+  
+  // 记录旋转信息用于调试
+  addLog(`下载数组：原始尺寸 ${imageData.width}x${imageData.height}，旋转后尺寸 ${rotatedImageData.width}x${rotatedImageData.height}`);
 
   if (mode === 'sixColor' && processedData.length !== canvas.width * canvas.height) {
     console.log(`错误：预期${canvas.width * canvas.height}字节，但得到${processedData.length}字节`);
@@ -485,6 +505,37 @@ function rotateCanvas() {
   canvas.height = currentWidth;
   addLog(`画布已旋转: ${currentWidth}x${currentHeight} -> ${canvas.width}x${canvas.height}`);
   updateImage();
+}
+
+function rotateImageData90Degrees(imageData) {
+  // 创建临时canvas进行90度旋转
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  // 设置临时canvas的尺寸（宽高交换）
+  tempCanvas.width = imageData.width;
+  tempCanvas.height = imageData.height;
+  
+  // 将原始图像数据绘制到临时canvas
+  tempCtx.putImageData(imageData, 0, 0);
+  
+  // 创建新的canvas进行旋转
+  const rotatedCanvas = document.createElement('canvas');
+  const rotatedCtx = rotatedCanvas.getContext('2d');
+
+  // Note: 这里宽高交换了, 因为必须竖着输出图片才能正确在墨水标签上显示
+  rotatedCanvas.width = imageData.height;
+  rotatedCanvas.height = imageData.width;
+  
+  // 在旋转canvas上进行90度旋转绘制
+  rotatedCtx.save();
+  rotatedCtx.translate(rotatedCanvas.width, 0);
+  rotatedCtx.rotate(Math.PI / 2);
+  rotatedCtx.drawImage(tempCanvas, 0, 0);
+  rotatedCtx.restore();
+  
+  // 返回旋转后的图像数据
+  return rotatedCtx.getImageData(0, 0, rotatedCanvas.width, rotatedCanvas.height);
 }
 
 function clearCanvas() {
