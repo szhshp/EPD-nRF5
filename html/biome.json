@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -8,11 +8,11 @@
   "files": {
     "ignoreUnknown": false,
     "includes": [
-      "src/**/*.ts",
-      "src/**/*.js",
-      "src/**/*.json",
-      "!src/**/*.d.ts",
-      "!src/**/*.css"
+      "**/*.ts",
+      "**/*.js",
+      "**/*.json",
+      "!**/*.d.ts",
+      "!**/*.css"
     ]
   },
   "formatter": {
@@ -245,7 +245,12 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "includes": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mts",
+        "**/*.cts"
+      ],
       "linter": {
         "rules": {
           "complexity": {
@@ -281,7 +286,9 @@
       }
     },
     {
-      "includes": ["**/*.{js,mjs,cjs,ts,jsx,tsx}"]
+      "includes": [
+        "**/*.{js,mjs,cjs,ts,jsx,tsx}"
+      ]
     }
   ],
   "assist": {

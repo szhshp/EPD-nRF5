@@ -16,103 +16,106 @@ let textBold = false; // Track if text should be bold
 let textItalic = false; // Track if text should be italic
 
 function setCanvasTitle(title) {
-  const canvasTitle = document.querySelector('.canvas-title');
+  const canvasTitle = document.querySelector(".canvas-title");
   if (canvasTitle) {
     canvasTitle.innerText = title;
-    canvasTitle.style.display = title && title !== '' ? 'block' : 'none';
+    canvasTitle.style.display = title && title !== "" ? "block" : "none";
   }
 }
 
 function initPaintTools() {
-  document.getElementById('brush-mode').addEventListener('click', () => {
-    if (currentTool === 'brush') {
-      setActiveTool(null, '');
+  document.getElementById("brush-mode").addEventListener("click", () => {
+    if (currentTool === "brush") {
+      setActiveTool(null, "");
     } else {
-      setActiveTool('brush', '画笔模式');
-      brushColor = document.getElementById('brush-color').value;
+      setActiveTool("brush", "画笔模式");
+      brushColor = document.getElementById("brush-color").value;
     }
   });
-  
-  document.getElementById('eraser-mode').addEventListener('click', () => {
-    if (currentTool === 'eraser') {
-      setActiveTool(null, '');
+
+  document.getElementById("eraser-mode").addEventListener("click", () => {
+    if (currentTool === "eraser") {
+      setActiveTool(null, "");
     } else {
-      setActiveTool('eraser', '橡皮擦');
+      setActiveTool("eraser", "橡皮擦");
       brushColor = "#FFFFFF";
     }
   });
 
-  document.getElementById('text-mode').addEventListener('click', () => {
-    if (currentTool === 'text') {
-      setActiveTool(null, '');
+  document.getElementById("text-mode").addEventListener("click", () => {
+    if (currentTool === "text") {
+      setActiveTool(null, "");
     } else {
-      setActiveTool('text', '插入文字');
-      brushColor = document.getElementById('brush-color').value;
+      setActiveTool("text", "插入文字");
+      brushColor = document.getElementById("brush-color").value;
     }
   });
-  
-  document.getElementById('brush-color').addEventListener('change', (e) => {
+
+  document.getElementById("brush-color").addEventListener("change", (e) => {
     brushColor = e.target.value;
   });
-  
-  document.getElementById('brush-size').addEventListener('change', (e) => {
+
+  document.getElementById("brush-size").addEventListener("change", (e) => {
     brushSize = parseInt(e.target.value);
   });
 
-  document.body.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+  document.body.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       startTextPlacement();
 
-            /* simulate place text */
+      /* simulate place text */
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      
+
       // Create a proper event object with viewport-relative coordinates
       const rect = canvas.getBoundingClientRect();
       const simulatedEvent = {
         clientX: rect.left + centerX * (rect.width / canvas.width),
-        clientY: rect.top + centerY * (rect.height / canvas.height)
+        clientY: rect.top + centerY * (rect.height / canvas.height),
       };
-      
+
       // Try both approaches: dispatch event and direct call
       try {
         // Dispatch the event to trigger the normal click flow
-        canvas.dispatchEvent(new MouseEvent('click', simulatedEvent));
-        
+        canvas.dispatchEvent(new MouseEvent("click", simulatedEvent));
+
         // Also try calling placeText directly as a fallback
         if (isTextPlacementMode) {
           placeText(simulatedEvent);
         }
       } catch (error) {
-        console.error('Error simulating click:', error);
+        console.error("Error simulating click:", error);
       }
-
     }
   });
 
-  document.getElementById('add-text-btn').addEventListener('click', startTextPlacement);
+  document
+    .getElementById("add-text-btn")
+    .addEventListener("click", startTextPlacement);
 
   // Add event listeners for bold and italic buttons
-  document.getElementById('text-bold').addEventListener('click', () => {
+  document.getElementById("text-bold").addEventListener("click", () => {
     textBold = !textBold;
-    document.getElementById('text-bold').classList.toggle('primary', textBold);
+    document.getElementById("text-bold").classList.toggle("primary", textBold);
   });
-  
-  document.getElementById('text-italic').addEventListener('click', () => {
+
+  document.getElementById("text-italic").addEventListener("click", () => {
     textItalic = !textItalic;
-    document.getElementById('text-italic').classList.toggle('primary', textItalic);
+    document
+      .getElementById("text-italic")
+      .classList.toggle("primary", textItalic);
   });
-  
+
   setupCanvasForPainting();
 
   // Ensure no tool is selected by default
   updateToolUI();
-  
+
   // 默认选中文字工具模式
   setTimeout(() => {
-    setActiveTool('text', '插入文字');
+    setActiveTool("text", "插入文字");
     // 自动聚焦到文字输入框
-    document.getElementById('text-input').focus();
+    document.getElementById("text-input").focus();
   }, 100);
 }
 
@@ -128,55 +131,63 @@ function setActiveTool(tool, title) {
 
 function updateToolUI() {
   // Update UI to reflect active tool or no tool
-  document.getElementById('brush-mode').classList.toggle('active', currentTool === 'brush');
-  document.getElementById('eraser-mode').classList.toggle('active', currentTool === 'eraser');
-  document.getElementById('text-mode').classList.toggle('active', currentTool === 'text');
+  document
+    .getElementById("brush-mode")
+    .classList.toggle("active", currentTool === "brush");
+  document
+    .getElementById("eraser-mode")
+    .classList.toggle("active", currentTool === "eraser");
+  document
+    .getElementById("text-mode")
+    .classList.toggle("active", currentTool === "text");
 
   // Show/hide brush tools
-  document.querySelectorAll('.brush-tools').forEach(el => {
-    el.style.display = ['brush', 'eraser', 'text'].includes(currentTool) ? 'flex' : 'none';
+  document.querySelectorAll(".brush-tools").forEach((el) => {
+    el.style.display = ["brush", "eraser", "text"].includes(currentTool)
+      ? "flex"
+      : "none";
   });
-  document.getElementById('brush-color').disabled = currentTool === 'eraser';
-  document.getElementById('brush-size').disabled = currentTool === 'text';
+  document.getElementById("brush-color").disabled = currentTool === "eraser";
+  document.getElementById("brush-size").disabled = currentTool === "text";
 
   // Show/hide text tools
-  document.querySelectorAll('.text-tools').forEach(el => {
-    el.style.display = currentTool === 'text' ? 'flex' : 'none';
+  document.querySelectorAll(".text-tools").forEach((el) => {
+    el.style.display = currentTool === "text" ? "flex" : "none";
   });
 }
 
 function setupCanvasForPainting() {
-  canvas.addEventListener('mousedown', startPaint);
-  canvas.addEventListener('mousemove', paint);
-  canvas.addEventListener('mouseup', endPaint);
-  canvas.addEventListener('mouseleave', endPaint);
-  canvas.addEventListener('click', handleCanvasClick);
-  
+  canvas.addEventListener("mousedown", startPaint);
+  canvas.addEventListener("mousemove", paint);
+  canvas.addEventListener("mouseup", endPaint);
+  canvas.addEventListener("mouseleave", endPaint);
+  canvas.addEventListener("click", handleCanvasClick);
+
   // Touch support
-  canvas.addEventListener('touchstart', onTouchStart);
-  canvas.addEventListener('touchmove', onTouchMove);
-  canvas.addEventListener('touchend', onTouchEnd);
+  canvas.addEventListener("touchstart", onTouchStart);
+  canvas.addEventListener("touchmove", onTouchMove);
+  canvas.addEventListener("touchend", onTouchEnd);
 }
 
 function startPaint(e) {
   if (!currentTool) return;
 
-  if (currentTool === 'text') {
+  if (currentTool === "text") {
     // Check if we're clicking on a text element to drag
     const textElement = findTextElementAt(e);
     if (textElement && textElement === selectedTextElement) {
       isDraggingText = true;
-      
+
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
       const x = (e.clientX - rect.left) * scaleX;
       const y = (e.clientY - rect.top) * scaleY;
-      
+
       // Calculate offset for smooth dragging
       dragOffsetX = textElement.x - x;
       dragOffsetY = textElement.y - y;
-      
+
       return; // Don't start drawing
     }
   } else {
@@ -195,7 +206,7 @@ function endPaint() {
 function paint(e) {
   if (!currentTool) return;
 
-  if (currentTool === 'text') {
+  if (currentTool === "text") {
     if (isDraggingText && selectedTextElement) {
       dragText(e);
     }
@@ -212,92 +223,92 @@ function draw(e) {
   const scaleY = canvas.height / rect.height;
   const x = (e.clientX - rect.left) * scaleX;
   const y = (e.clientY - rect.top) * scaleY;
-  
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
+
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
   ctx.strokeStyle = brushColor;
   ctx.lineWidth = brushSize;
-  
+
   ctx.beginPath();
-  
+
   if (lastX === 0 && lastY === 0) {
     // For the first point, just do a dot
     ctx.moveTo(x, y);
-    ctx.lineTo(x+0.1, y+0.1);
-    
+    ctx.lineTo(x + 0.1, y + 0.1);
+
     // Store the dot for redrawing
     lineSegments.push({
-      type: 'dot',
+      type: "dot",
       x: x,
       y: y,
       color: brushColor,
-      size: brushSize
+      size: brushSize,
     });
   } else {
     // Connect to the previous point
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
-    
+
     // Store the line segment for redrawing
     lineSegments.push({
-      type: 'line',
+      type: "line",
       x1: lastX,
       y1: lastY,
       x2: x,
       y2: y,
       color: brushColor,
-      size: brushSize
+      size: brushSize,
     });
   }
-  
+
   ctx.stroke();
-  
+
   lastX = x;
   lastY = y;
 }
 
 function handleCanvasClick(e) {
-  if (currentTool === 'text' && isTextPlacementMode) {
+  if (currentTool === "text" && isTextPlacementMode) {
     placeText(e);
   }
 }
 
 // Improve touch handling for text placement
 function onTouchStart(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    
-    // If in text placement mode, handle as a click
-    if (currentTool === 'text' && isTextPlacementMode) {
-        const mouseEvent = new MouseEvent('click', {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
-        return;
-    }
-    
-    // Otherwise handle as normal drawing
-    const mouseEvent = new MouseEvent('mousedown', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
+  e.preventDefault();
+  const touch = e.touches[0];
+
+  // If in text placement mode, handle as a click
+  if (currentTool === "text" && isTextPlacementMode) {
+    const mouseEvent = new MouseEvent("click", {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
     });
     canvas.dispatchEvent(mouseEvent);
+    return;
+  }
+
+  // Otherwise handle as normal drawing
+  const mouseEvent = new MouseEvent("mousedown", {
+    clientX: touch.clientX,
+    clientY: touch.clientY,
+  });
+  canvas.dispatchEvent(mouseEvent);
 }
 
 function onTouchMove(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const mouseEvent = new MouseEvent('mousemove', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-    });
-    canvas.dispatchEvent(mouseEvent);
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent("mousemove", {
+    clientX: touch.clientX,
+    clientY: touch.clientY,
+  });
+  canvas.dispatchEvent(mouseEvent);
 }
 
 function onTouchEnd(e) {
-    e.preventDefault();
-    endPaint();
+  e.preventDefault();
+  endPaint();
 }
 
 function dragText(e) {
@@ -306,11 +317,11 @@ function dragText(e) {
   const scaleY = canvas.height / rect.height;
   const x = (e.clientX - rect.left) * scaleX;
   const y = (e.clientY - rect.top) * scaleY;
-  
+
   // Update text position with offset
   selectedTextElement.x = x + dragOffsetX;
   selectedTextElement.y = y + dragOffsetY;
-  
+
   // Redraw selected text element
   if (draggingCanvasContext) {
     ctx.putImageData(draggingCanvasContext, 0, 0);
@@ -319,7 +330,11 @@ function dragText(e) {
   }
   ctx.font = selectedTextElement.font;
   ctx.fillStyle = selectedTextElement.color;
-  ctx.fillText(selectedTextElement.text, selectedTextElement.x, selectedTextElement.y);
+  ctx.fillText(
+    selectedTextElement.text,
+    selectedTextElement.x,
+    selectedTextElement.y,
+  );
 }
 
 function findTextElementAt(e) {
@@ -328,11 +343,11 @@ function findTextElementAt(e) {
   const scaleY = canvas.height / rect.height;
   const x = (e.clientX - rect.left) * scaleX;
   const y = (e.clientY - rect.top) * scaleY;
-  
+
   // Search through text elements in reverse order (top-most first)
   for (let i = textElements.length - 1; i >= 0; i--) {
     const text = textElements[i];
-    
+
     // Calculate text dimensions
     ctx.font = text.font;
     const textWidth = ctx.measureText(text.text).width;
@@ -342,37 +357,39 @@ function findTextElementAt(e) {
     const fontSizeMatch = text.font.match(/(\d+)px/);
     const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 14; // Default to 14 if not found
     const textHeight = fontSize * 1.2; // Approximate height
-    
+
     // Check if click is within text bounds (allowing for some margin)
     const margin = 5;
-    if (x >= text.x - margin && 
-        x <= text.x + textWidth + margin && 
-        y >= text.y - textHeight + margin && 
-        y <= text.y + margin) {
+    if (
+      x >= text.x - margin &&
+      x <= text.x + textWidth + margin &&
+      y >= text.y - textHeight + margin &&
+      y <= text.y + margin
+    ) {
       return text;
     }
   }
-  
+
   return null;
 }
 
 function startTextPlacement() {
-  const text = document.getElementById('text-input').value.trim();
+  const text = document.getElementById("text-input").value.trim();
   if (!text) {
-      alert('请输入文字内容');
-      return;
+    alert("请输入文字内容");
+    return;
   }
 
   isTextPlacementMode = true;
 
   // Add visual feedback
-  setCanvasTitle('点击画布放置文字');
-  canvas.classList.add('text-placement-mode');
+  setCanvasTitle("点击画布放置文字");
+  canvas.classList.add("text-placement-mode");
 }
 
 function cancelTextPlacement() {
   isTextPlacementMode = false;
-  canvas.classList.remove('text-placement-mode'); 
+  canvas.classList.remove("text-placement-mode");
 
   // reset dragging state
   isDraggingText = false;
@@ -389,65 +406,65 @@ function placeText(e) {
   const x = (e.clientX - rect.left) * scaleX;
   const y = (e.clientY - rect.top) * scaleY;
 
-  const text = document.getElementById('text-input').value;
-  const fontFamily = document.getElementById('font-family').value;
-  const fontSize = document.getElementById('font-size').value;
+  const text = document.getElementById("text-input").value;
+  const fontFamily = document.getElementById("font-family").value;
+  const fontSize = document.getElementById("font-size").value;
 
   // Build font style string
-  let fontStyle = '';
-  if (textItalic) fontStyle += 'italic ';
-  if (textBold) fontStyle += 'bold ';
-  
+  let fontStyle = "";
+  if (textItalic) fontStyle += "italic ";
+  if (textBold) fontStyle += "bold ";
+
   // Create a new text element
   const newText = {
     text: text,
     x: x,
     y: y,
     font: `${fontStyle}${fontSize}px ${fontFamily}`,
-    color: brushColor
+    color: brushColor,
   };
-  
+
   // Add to our list of text elements
   textElements.push(newText);
-  
+
   // Select this text element for immediate dragging
   selectedTextElement = newText;
   draggingCanvasContext = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  
+
   // Draw text on canvas
   ctx.font = newText.font;
   ctx.fillStyle = newText.color;
-  
+
   // Calculate text dimensions for proper centering
   const textMetrics = ctx.measureText(newText.text);
   const textWidth = textMetrics.width;
-  
+
   // Extract font size for height calculation
   const fontSizeMatch = newText.font.match(/(\d+)px/);
   const textFontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 14;
   const textHeight = textFontSize * 1.2; // Approximate height
-  
+
   // Adjust position to center the text
-  const centeredX = newText.x - (textWidth / 2);
-  const centeredY = newText.y + (textHeight / 2);
-  
+  const centeredX = newText.x - textWidth / 2;
+  const centeredY = newText.y + textHeight / 2;
+
   // Update the stored position to the centered coordinates
   newText.x = centeredX;
   newText.y = centeredY;
-  
+
   // Draw the text at the centered position
   ctx.fillText(newText.text, centeredX, centeredY);
-  
+
   // Reset
-  document.getElementById('text-input').value = '';
+  document.getElementById("text-input").value = "";
   isTextPlacementMode = false;
-  canvas.classList.remove('text-placement-mode');
-  setCanvasTitle('拖动新添加文字可调整位置');
+  canvas.classList.remove("text-placement-mode");
+  setCanvasTitle("拖动新添加文字可调整位置");
 }
 
 function redrawTextElements() {
   // Redraw all text elements after dithering
-  textElements.forEach(item => {
+  textElements.forEach((item) => {
     ctx.font = item.font;
     ctx.fillStyle = item.color;
     ctx.fillText(item.text, item.x, item.y);
@@ -456,21 +473,21 @@ function redrawTextElements() {
 
 function redrawLineSegments() {
   // Redraw all line segments after dithering
-  lineSegments.forEach(segment => {
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
+  lineSegments.forEach((segment) => {
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
     ctx.strokeStyle = segment.color;
     ctx.lineWidth = segment.size;
     ctx.beginPath();
-    
-    if (segment.type === 'dot') {
+
+    if (segment.type === "dot") {
       ctx.moveTo(segment.x, segment.y);
-      ctx.lineTo(segment.x+0.1, segment.y+0.1);
+      ctx.lineTo(segment.x + 0.1, segment.y + 0.1);
     } else {
       ctx.moveTo(segment.x1, segment.y1);
       ctx.lineTo(segment.x2, segment.y2);
     }
-    
+
     ctx.stroke();
   });
 }
