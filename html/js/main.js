@@ -539,14 +539,11 @@ function rotateImageData90Degrees(imageData) {
 }
 
 function clearCanvas() {
-  if (confirm('清除画布内容?')) {
-    fillCanvas('white');
-    textElements = []; // Clear stored text positions
-    lineSegments = []; // Clear stored line segments
-    if (isCropMode()) exitCropMode();
-    return true;
-  }
-  return false;
+  fillCanvas('white');
+  textElements = []; // Clear stored text positions
+  lineSegments = []; // Clear stored line segments
+  if (isCropMode()) exitCropMode();
+  return true;
 }
 
 function convertDithering() {

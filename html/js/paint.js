@@ -340,9 +340,9 @@ function startTextPlacement() {
 
   isTextPlacementMode = true;
 
-  // Add visual feedback
-  setCanvasTitle('点击画布放置文字');
-  canvas.classList.add('text-placement-mode');
+  // // Add visual feedback
+  // setCanvasTitle('点击画布放置文字');
+  // canvas.classList.add('text-placement-mode');
 }
 
 function cancelTextPlacement() {
@@ -392,7 +392,26 @@ function placeText(e) {
   // Draw text on canvas
   ctx.font = newText.font;
   ctx.fillStyle = newText.color;
-  ctx.fillText(newText.text, newText.x, newText.y);
+  
+  // Calculate text dimensions for proper centering
+  const textMetrics = ctx.measureText(newText.text);
+  const textWidth = textMetrics.width;
+  
+  // Extract font size for height calculation
+  const fontSizeMatch = newText.font.match(/(\d+)px/);
+  const textFontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 14;
+  const textHeight = textFontSize * 1.2; // Approximate height
+  
+  // Adjust position to center the text
+  const centeredX = newText.x - (textWidth / 2);
+  const centeredY = newText.y + (textHeight / 2);
+  
+  // Update the stored position to the centered coordinates
+  newText.x = centeredX;
+  newText.y = centeredY;
+  
+  // Draw the text at the centered position
+  ctx.fillText(newText.text, centeredX, centeredY);
   
   // Reset
   document.getElementById('text-input').value = '';

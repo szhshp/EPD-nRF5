@@ -113,6 +113,16 @@
 			<div class="canvas-container">
 				<div class="canvas-title"></div>
 				<canvas id="canvas" width="250" height="122"></canvas>
+				<div class="text-input-section">
+					<div class="flex-container">
+						<div class="flex-group">
+							<input type="text" id="text-input" placeholder="输入文字" class="large-text-input">
+						</div>
+						<div class="flex-group">
+							<button id="add-text-btn" class="primary large-button">添加文字</button>
+						</div>
+					</div>
+				</div>
 				<div class="flex-container canvas-tools">
 					<div class="flex-group tool-buttons">
 						<button id="brush-mode" title="画笔" class="tool-button">✏️</button>
@@ -171,10 +181,8 @@
 						<input type="number" id="font-size" value="24" min="1" max="100">
 					</div>
 					<div class="flex-group text-tools">
-						<input type="text" id="text-input" placeholder="输入文字" style="width:150px">
 						<button id="text-bold" title="粗体">B</button>
 						<button id="text-italic" title="斜体">I</button>
-						<button id="add-text-btn" class="primary">添加文字</button>
 					</div>
 					<div class="flex-group crop-tools">
 						<button id="crop-zoom-in" title="放大" class="secondary">+</button>
@@ -187,6 +195,8 @@
 					</div>
 				</div>
 			</div>
+
+
 		</fieldset>
 		<div class="footer">
 
