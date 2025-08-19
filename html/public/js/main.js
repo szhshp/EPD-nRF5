@@ -480,6 +480,11 @@ function updateCanvasSize() {
   const selectedSizeName = document.getElementById('canvasSize').value;
   const selectedSize = canvasSizes.find(size => size.name === selectedSizeName);
 
+  if (!selectedSize) {
+    addLog("未找到对应的画布尺寸, 使用默认 2.13_250_122");
+    selectedSize = canvasSizes.find(size => size.name === '2.13_250_122');
+  }
+
   canvas.width = selectedSize.width;
   canvas.height = selectedSize.height;
 
